@@ -99,13 +99,14 @@
       height: 100vh;
       background: white;
       box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-      transition: var(--transition);
+      transition: transform 0.3s ease-in-out;
       z-index: 99;
       padding: 80px 20px 20px;
+      overflow-y: auto;
     }
 
     .sidebar-menu.active {
-      right: 0;
+      transform: translateX(-300px);
     }
 
     .menu-overlay {
@@ -119,7 +120,7 @@
       z-index: 98;
       opacity: 0;
       pointer-events: none;
-      transition: var(--transition);
+      transition: opacity 0.3s ease;
     }
 
     .menu-overlay.active {
@@ -614,7 +615,7 @@
         right: -100%;
       }
       .sidebar-menu.active {
-        right: 0;
+        transform: translateX(-100%);
       }
     }
   </style>
@@ -706,7 +707,7 @@
     </div>
   </main>
 
-  <!-- Модальное окно авторизации/регистрации -->
+  <!-- Модальные окна -->
   <div class="modal" id="authModal">
     <div class="modal-content">
       <div class="close-btn" onclick="closeModal('authModal')">
@@ -764,7 +765,6 @@
     </div>
   </div>
 
-  <!-- Модальное окно деталей курса -->
   <div class="modal" id="courseModal">
     <div class="modal-content">
       <div class="close-btn" onclick="closeModal('courseModal')">
@@ -795,7 +795,6 @@
     </div>
   </div>
 
-  <!-- Модальное окно добавления курса (для преподавателей) -->
   <div class="modal" id="addCourseModal">
     <div class="modal-content">
       <div class="close-btn" onclick="closeModal('addCourseModal')">
@@ -900,8 +899,7 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAuth();
   
   // Настройка бокового меню
-  menuToggle.addEventListener('click', toggleMenu);
-  menuOverlay.addEventListener('click', toggleMenu);
+  setupMenuToggle();
   
   // Настройка формы авторизации
   document.getElementById('loginForm').addEventListener('submit', handleLogin);
@@ -925,40 +923,50 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // Настройка кнопки расписания
-  scheduleBtn.addEventListener('click', () => {
-    window.location.href = '/schedule.html';
-  });
+  if (scheduleBtn) {
+    scheduleBtn.addEventListener('click', () => {
+      window.location.href = '/schedule.html';
+    });
+  }
 });
 
-// Функции для работы с модальными окнами
-function openModal(modalId) {
-  document.getElementById(modalId).classList.add('active');
-}
-
-function closeModal(modalId) {
-  document.getElementById(modalId).classList.remove('active');
-}
-
-function switchAuthTab(tab) {
-  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+// Настройка кнопки меню
+function setupMenuToggle() {
+  menuToggle.addEventListener('click', toggleMenu);
+  menuOverlay.addEventListener('click', toggleMenu);
   
-  if (tab === 'login') {
-    document.querySelector('.auth-tab:nth-child(1)').classList.add('active');
-    document.getElementById('loginForm').classList.add('active');
-  } else {
-    document.querySelector('.auth-tab:nth-child(2)').classList.add('active');
-    document.getElementById('registerForm').classList.add('active');
-  }
+  // Закрытие меню при клике на пункт меню на мобильных устройствах
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 576 && sidebarMenu.classList.contains('active')) {
+      if (e.target.closest('.menu-list a')) {
+        toggleMenu();
+      }
+    }
+  });
+  
+  // Закрытие меню при изменении размера окна
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 576 && sidebarMenu.classList.contains('active')) {
+      toggleMenu();
+    }
+  });
 }
 
-// Функции для работы с боковым меню
+// Функция для переключения меню
 function toggleMenu() {
   menuToggle.classList.toggle('active');
   sidebarMenu.classList.toggle('active');
   menuOverlay.classList.toggle('active');
+  
+  // Блокировка скролла при открытом меню
+  if (sidebarMenu.classList.contains('active')) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
 }
 
+// Обновление меню
 function updateMenu() {
   menuList.innerHTML = '';
   
@@ -985,7 +993,6 @@ function updateMenu() {
       a.addEventListener('click', (e) => {
         e.preventDefault();
         item.action();
-        toggleMenu();
       });
       li.appendChild(a);
       menuList.appendChild(li);
@@ -1007,11 +1014,32 @@ function updateMenu() {
       a.addEventListener('click', (e) => {
         e.preventDefault();
         item.action();
-        toggleMenu();
       });
       li.appendChild(a);
       menuList.appendChild(li);
     });
+  }
+}
+
+// Функции для работы с модальными окнами
+function openModal(modalId) {
+  document.getElementById(modalId).classList.add('active');
+}
+
+function closeModal(modalId) {
+  document.getElementById(modalId).classList.remove('active');
+}
+
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  
+  if (tab === 'login') {
+    document.querySelector('.auth-tab:nth-child(1)').classList.add('active');
+    document.getElementById('loginForm').classList.add('active');
+  } else {
+    document.querySelector('.auth-tab:nth-child(2)').classList.add('active');
+    document.getElementById('registerForm').classList.add('active');
   }
 }
 
@@ -1066,21 +1094,4 @@ function renderCourses(courses) {
           <div class="club-meta-item">
             <i class="fas fa-users"></i> ${course.enrolled_count || 0}/${course.max_students}
           </div>
-        </div>
-        <p class="club-description">${course.description || 'Описание отсутствует'}</p>
-        <div class="club-actions">
-          <button class="details-btn" data-id="${course.id}">
-            <i class="fas fa-info-circle"></i> Подробнее
-          </button>
-          <button class="signup-btn" data-id="${course.id}">
-            Записаться
-          </button>
-        </div>
-      </div>
-    `;
-    
-    clubsContainer.appendChild(card);
-  });
-  
-  // Настройка кнопок "Подробнее" и "Записаться"
-  document.querySelectorAll
+       
