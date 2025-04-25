@@ -1081,7 +1081,82 @@
         
         clubsContainer.appendChild(card);
       });
-// Настраиваем кнопку записи
+ // Настройка кнопок "Подробнее" и "Записаться"
+  document.querySelectorAll('.details-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const courseId = e.currentTarget.dataset.id;
+      showCourseDetails(courseId);
+    });
+  });
+  
+  document.querySelectorAll('.signup-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const courseId = e.currentTarget.dataset.id;
+      const courseName = e.currentTarget.closest('.club-card').querySelector('.club-name').textContent;
+      prepareSignup(courseId, courseName);
+    });
+  });
+}
+
+function getScheduleText(schedule) {
+  if (!schedule || schedule.length === 0) return 'Расписание не указано';
+  
+  const daysMap = {
+    'Понедельник': 'Пн',
+    'Вторник': 'Вт',
+    'Среда': 'Ср',
+    'Четверг': 'Чт',
+    'Пятница': 'Пт',
+    'Суббота': 'Сб',
+    'Воскресенье': 'Вс'
+  };
+  
+  const days = schedule.map(s => daysMap[s.day] || s.day).join('/');
+  const time = schedule[0].start_time;
+  return `${days} ${time}`;
+}
+
+async function showCourseDetails(courseId) {
+  const course = await getCourseDetails(courseId);
+  if (!course) {
+    alert('Не удалось загрузить информацию о курсе');
+    return;
+  }
+  
+  currentCourseId = courseId;
+  
+  // Заполняем модальное окно данными о курсе
+  document.getElementById('courseModalTitle').textContent = course.name;
+  document.getElementById('courseTeacher').textContent = `Преподаватель: ${course.teacher_name || 'не указан'}`;
+  document.getElementById('courseDescription').textContent = `Описание: ${course.description || 'отсутствует'}`;
+  
+  let levelText = '';
+  if (course.level === 'beginner') levelText = 'Начинающий';
+  else if (course.level === 'intermediate') levelText = 'Средний';
+  else levelText = 'Продвинутый';
+  document.getElementById('courseLevel').textContent = `Уровень: ${levelText}`;
+  
+  document.getElementById('courseSpots').textContent = `Места: ${course.enrolled_count || 0}/${course.max_students}`;
+  
+  // Заполняем расписание
+  const scheduleContainer = document.getElementById('courseSchedule');
+  scheduleContainer.innerHTML = '';
+  
+  if (course.schedule && course.schedule.length > 0) {
+    course.schedule.forEach(s => {
+      const item = document.createElement('div');
+      item.className = 'schedule-item';
+      item.innerHTML = `
+        <span>${s.day}</span>
+        <span>${s.start_time} - ${s.end_time}</span>
+      `;
+      scheduleContainer.appendChild(item);
+    });
+  } else {
+    scheduleContainer.innerHTML = '<p>Расписание не указано</p>';
+  }
+  
+  // Настраиваем кнопку записи
   const enrollBtn = document.getElementById('enrollBtn');
   if (course.isEnrolled) {
     enrollBtn.textContent = 'Вы уже записаны';
