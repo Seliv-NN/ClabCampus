@@ -99,14 +99,13 @@
       height: 100vh;
       background: white;
       box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease-in-out;
+      transition: var(--transition);
       z-index: 99;
       padding: 80px 20px 20px;
-      overflow-y: auto;
     }
 
     .sidebar-menu.active {
-      transform: translateX(-300px);
+      right: 0;
     }
 
     .menu-overlay {
@@ -120,7 +119,7 @@
       z-index: 98;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s ease;
+      transition: var(--transition);
     }
 
     .menu-overlay.active {
@@ -218,38 +217,6 @@
       font-size: 16px;
       color: var(--gray);
       max-width: 600px;
-    }
-
-    /* Категории */
-    .categories {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      overflow-x: auto;
-      padding-bottom: 10px;
-    }
-
-    .category-btn {
-      padding: 8px 16px;
-      border: 1px solid #ddd;
-      border-radius: 20px;
-      background: white;
-      color: var(--gray);
-      font-size: 14px;
-      cursor: pointer;
-      transition: var(--transition);
-      white-space: nowrap;
-    }
-
-    .category-btn:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    .category-btn.active {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
     }
 
     /* Фильтры */
@@ -602,11 +569,6 @@
       .filters { flex-direction: column; }
       .search-bar { max-width: 100%; }
       .modal-content { width: 95%; }
-      .categories {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
     }
 
     @media (max-width: 576px) {
@@ -615,7 +577,7 @@
         right: -100%;
       }
       .sidebar-menu.active {
-        transform: translateX(-100%);
+        right: 0;
       }
     }
   </style>
@@ -707,7 +669,7 @@
     </div>
   </main>
 
-  <!-- Модальные окна -->
+  <!-- Модальное окно авторизации/регистрации -->
   <div class="modal" id="authModal">
     <div class="modal-content">
       <div class="close-btn" onclick="closeModal('authModal')">
@@ -765,6 +727,7 @@
     </div>
   </div>
 
+  <!-- Модальное окно деталей курса -->
   <div class="modal" id="courseModal">
     <div class="modal-content">
       <div class="close-btn" onclick="closeModal('courseModal')">
@@ -795,6 +758,7 @@
     </div>
   </div>
 
+  <!-- Модальное окно добавления курса (для преподавателей) -->
   <div class="modal" id="addCourseModal">
     <div class="modal-content">
       <div class="close-btn" onclick="closeModal('addCourseModal')">
@@ -899,7 +863,8 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAuth();
   
   // Настройка бокового меню
-  setupMenuToggle();
+  menuToggle.addEventListener('click', toggleMenu);
+  menuOverlay.addEventListener('click', toggleMenu);
   
   // Настройка формы авторизации
   document.getElementById('loginForm').addEventListener('submit', handleLogin);
@@ -923,50 +888,40 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // Настройка кнопки расписания
-  if (scheduleBtn) {
-    scheduleBtn.addEventListener('click', () => {
-      window.location.href = '/schedule.html';
-    });
-  }
+  scheduleBtn.addEventListener('click', () => {
+    window.location.href = '/schedule.html';
+  });
 });
 
-// Настройка кнопки меню
-function setupMenuToggle() {
-  menuToggle.addEventListener('click', toggleMenu);
-  menuOverlay.addEventListener('click', toggleMenu);
-  
-  // Закрытие меню при клике на пункт меню на мобильных устройствах
-  document.addEventListener('click', (e) => {
-    if (window.innerWidth <= 576 && sidebarMenu.classList.contains('active')) {
-      if (e.target.closest('.menu-list a')) {
-        toggleMenu();
-      }
-    }
-  });
-  
-  // Закрытие меню при изменении размера окна
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 576 && sidebarMenu.classList.contains('active')) {
-      toggleMenu();
-    }
-  });
+// Функции для работы с модальными окнами
+function openModal(modalId) {
+  document.getElementById(modalId).classList.add('active');
 }
 
-// Функция для переключения меню
+function closeModal(modalId) {
+  document.getElementById(modalId).classList.remove('active');
+}
+
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  
+  if (tab === 'login') {
+    document.querySelector('.auth-tab:nth-child(1)').classList.add('active');
+    document.getElementById('loginForm').classList.add('active');
+  } else {
+    document.querySelector('.auth-tab:nth-child(2)').classList.add('active');
+    document.getElementById('registerForm').classList.add('active');
+  }
+}
+
+// Функции для работы с боковым меню
 function toggleMenu() {
   menuToggle.classList.toggle('active');
   sidebarMenu.classList.toggle('active');
   menuOverlay.classList.toggle('active');
-  
-  // Блокировка скролла при открытом меню
-  if (sidebarMenu.classList.contains('active')) {
-    document.body.style.overflow = 'hidden';
-  } else {
-    document.body.style.overflow = '';
-  }
 }
 
-// Обновление меню
 function updateMenu() {
   menuList.innerHTML = '';
   
@@ -993,6 +948,7 @@ function updateMenu() {
       a.addEventListener('click', (e) => {
         e.preventDefault();
         item.action();
+        toggleMenu();
       });
       li.appendChild(a);
       menuList.appendChild(li);
@@ -1014,32 +970,11 @@ function updateMenu() {
       a.addEventListener('click', (e) => {
         e.preventDefault();
         item.action();
+        toggleMenu();
       });
       li.appendChild(a);
       menuList.appendChild(li);
     });
-  }
-}
-
-// Функции для работы с модальными окнами
-function openModal(modalId) {
-  document.getElementById(modalId).classList.add('active');
-}
-
-function closeModal(modalId) {
-  document.getElementById(modalId).classList.remove('active');
-}
-
-function switchAuthTab(tab) {
-  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-  
-  if (tab === 'login') {
-    document.querySelector('.auth-tab:nth-child(1)').classList.add('active');
-    document.getElementById('loginForm').classList.add('active');
-  } else {
-    document.querySelector('.auth-tab:nth-child(2)').classList.add('active');
-    document.getElementById('registerForm').classList.add('active');
   }
 }
 
@@ -1094,4 +1029,461 @@ function renderCourses(courses) {
           <div class="club-meta-item">
             <i class="fas fa-users"></i> ${course.enrolled_count || 0}/${course.max_students}
           </div>
-       
+        </div>
+        <p class="club-description">${course.description || 'Описание отсутствует'}</p>
+        <div class="club-actions">
+          <button class="details-btn" data-id="${course.id}">
+            <i class="fas fa-info-circle"></i> Подробнее
+          </button>
+          <button class="signup-btn" data-id="${course.id}">
+            Записаться
+          </button>
+        </div>
+      </div>
+    `;
+    
+    clubsContainer.appendChild(card);
+  });
+  
+  // Настройка кнопок "Подробнее" и "Записаться"
+  document.querySelectorAll('.details-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const courseId = e.currentTarget.dataset.id;
+      showCourseDetails(courseId);
+    });
+  });
+  
+  document.querySelectorAll('.signup-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const courseId = e.currentTarget.dataset.id;
+      const courseName = e.currentTarget.closest('.club-card').querySelector('.club-name').textContent;
+      prepareSignup(courseId, courseName);
+    });
+  });
+}
+
+function getScheduleText(schedule) {
+  if (!schedule || schedule.length === 0) return 'Расписание не указано';
+  
+  const daysMap = {
+    'Понедельник': 'Пн',
+    'Вторник': 'Вт',
+    'Среда': 'Ср',
+    'Четверг': 'Чт',
+    'Пятница': 'Пт',
+    'Суббота': 'Сб',
+    'Воскресенье': 'Вс'
+  };
+  
+  const days = schedule.map(s => daysMap[s.day] || s.day).join('/');
+  const time = schedule[0].start_time;
+  return `${days} ${time}`;
+}
+
+async function showCourseDetails(courseId) {
+  const course = await getCourseDetails(courseId);
+  if (!course) {
+    alert('Не удалось загрузить информацию о курсе');
+    return;
+  }
+  
+  currentCourseId = courseId;
+  
+  // Заполняем модальное окно данными о курсе
+  document.getElementById('courseModalTitle').textContent = course.name;
+  document.getElementById('courseTeacher').textContent = `Преподаватель: ${course.teacher_name || 'не указан'}`;
+  document.getElementById('courseDescription').textContent = `Описание: ${course.description || 'отсутствует'}`;
+  
+  let levelText = '';
+  if (course.level === 'beginner') levelText = 'Начинающий';
+  else if (course.level === 'intermediate') levelText = 'Средний';
+  else levelText = 'Продвинутый';
+  document.getElementById('courseLevel').textContent = `Уровень: ${levelText}`;
+  
+  document.getElementById('courseSpots').textContent = `Места: ${course.enrolled_count || 0}/${course.max_students}`;
+  
+  // Заполняем расписание
+  const scheduleContainer = document.getElementById('courseSchedule');
+  scheduleContainer.innerHTML = '';
+  
+  if (course.schedule && course.schedule.length > 0) {
+    course.schedule.forEach(s => {
+      const item = document.createElement('div');
+      item.className = 'schedule-item';
+      item.innerHTML = `
+        <span>${s.day}</span>
+        <span>${s.start_time} - ${s.end_time}</span>
+      `;
+      scheduleContainer.appendChild(item);
+    });
+  } else {
+    scheduleContainer.innerHTML = '<p>Расписание не указано</p>';
+  }
+  
+  // Настраиваем кнопку записи
+  const enrollBtn = document.getElementById('enrollBtn');
+  if (course.isEnrolled) {
+    enrollBtn.textContent = 'Вы уже записаны';
+    enrollBtn.disabled = true;
+  } else if (!course.canEnroll) {
+    if (currentUser) {
+      enrollBtn.textContent = 'Нет свободных мест';
+      enrollBtn.disabled = true;
+    } else {
+      enrollBtn.textContent = 'Войдите, чтобы записаться';
+      enrollBtn.onclick = () => {
+        closeModal('courseModal');
+        openModal('authModal');
+      };
+    }
+  } else {
+    enrollBtn.textContent = 'Записаться';
+    enrollBtn.disabled = false;
+    enrollBtn.onclick = handleEnrollment;
+  }
+  
+  openModal('courseModal');
+}
+
+function prepareSignup(courseId, courseName) {
+  if (!currentUser) {
+    openModal('authModal');
+    return;
+  }
+  
+  currentCourseId = courseId;
+  showCourseDetails(courseId);
+}
+
+function filterCourses() {
+  const categoryFilter = document.getElementById('categoryFilter').value;
+  const timeFilter = document.getElementById('timeFilter').value;
+  const levelFilter = document.getElementById('levelFilter').value;
+  const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+  const activeCategory = document.querySelector('.category-btn.active').textContent;
+  
+  const filteredCourses = allCourses.filter(course => {
+    // Фильтр по категории (из выпадающего списка)
+    if (categoryFilter && course.category !== categoryFilter) return false;
+    
+    // Фильтр по категории (из кнопок)
+    if (activeCategory !== 'Все курсы' && course.category !== activeCategory) return false;
+    
+    // Фильтр по уровню
+    if (levelFilter) {
+      let levelText = '';
+      if (course.level === 'beginner') levelText = 'Начинающий';
+      else if (course.level === 'intermediate') levelText = 'Средний';
+      else levelText = 'Продвинутый';
+      
+      if (levelText !== levelFilter) return false;
+    }
+    
+    // Фильтр по времени
+    if (timeFilter) {
+      let timeMatch = false;
+      course.schedule.forEach(s => {
+        const hour = parseInt(s.start_time.split(':')[0]);
+        if (timeFilter === 'Утро (9:00-12:00)' && hour >= 9 && hour < 12) timeMatch = true;
+        else if (timeFilter === 'День (12:00-17:00)' && hour >= 12 && hour < 17) timeMatch = true;
+        else if (timeFilter === 'Вечер (17:00-21:00)' && hour >= 17 && hour < 21) timeMatch = true;
+      });
+      if (!timeMatch) return false;
+    }
+    
+    // Фильтр по поиску
+    if (searchQuery) {
+      const nameMatch = course.name.toLowerCase().includes(searchQuery);
+      const descMatch = course.description.toLowerCase().includes(searchQuery);
+      const teacherMatch = course.teacher_name.toLowerCase().includes(searchQuery);
+      if (!nameMatch && !descMatch && !teacherMatch) return false;
+    }
+    
+    return true;
+  });
+  
+  renderCourses(filteredCourses);
+}
+
+function addScheduleItem() {
+  const scheduleItems = document.getElementById('scheduleItems');
+  const newItem = document.createElement('div');
+  newItem.className = 'form-group schedule-item';
+  newItem.innerHTML = `
+    <div class="form-group">
+      <label class="form-label">День недели</label>
+      <select class="form-control" name="day" required>
+        <option value="">Выберите день</option>
+        <option>Понедельник</option>
+        <option>Вторник</option>
+        <option>Среда</option>
+        <option>Четверг</option>
+        <option>Пятница</option>
+        <option>Суббота</option>
+        <option>Воскресенье</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Время начала</label>
+      <input type="time" class="form-control" name="start_time" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Время окончания</label>
+      <input type="time" class="form-control" name="end_time" required>
+    </div>
+    <button type="button" class="btn btn-sm btn-outline" onclick="this.parentNode.remove()">
+      <i class="fas fa-times"></i> Удалить
+    </button>
+  `;
+  scheduleItems.appendChild(newItem);
+}
+
+// Функции для работы с API
+async function checkAuth() {
+  try {
+    const response = await fetch('/api/me');
+    if (response.ok) {
+      const user = await response.json();
+      currentUser = user;
+      updateMenu();
+      scheduleBtn.style.display = 'inline-flex';
+    } else {
+      currentUser = null;
+      updateMenu();
+      scheduleBtn.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Ошибка при проверке авторизации:', error);
+  }
+}
+
+async function loadCourses() {
+  try {
+    const response = await fetch('/api/courses');
+    if (response.ok) {
+      const courses = await response.json();
+      renderCourses(courses);
+    } else {
+      console.error('Ошибка при загрузке курсов');
+    }
+  } catch (error) {
+    console.error('Ошибка при загрузке курсов:', error);
+  }
+}
+
+async function getCourseDetails(courseId) {
+  try {
+    const response = await fetch(`/api/courses/${courseId}`);
+    if (response.ok) {
+      return await response.json();
+    } else {
+      console.error('Ошибка при загрузке деталей курса');
+      return null;
+    }
+  } catch (error) {
+    console.error('Ошибка при загрузке деталей курса:', error);
+    return null;
+  }
+}
+
+// Обработчики форм
+async function handleLogin(e) {
+  e.preventDefault();
+  const username = document.getElementById('loginUsername').value;
+  const password = document.getElementById('loginPassword').value;
+  
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, password })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      currentUser = data.user;
+      updateMenu();
+      closeModal('authModal');
+      scheduleBtn.style.display = 'inline-flex';
+      loadCourses();
+      
+      // Очищаем форму
+      document.getElementById('loginUsername').value = '';
+      document.getElementById('loginPassword').value = '';
+    } else {
+      const error = await response.json();
+      alert(error.error || 'Ошибка авторизации');
+    }
+  } catch (error) {
+    console.error('Ошибка при авторизации:', error);
+    alert('Ошибка при авторизации');
+  }
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  const username = document.getElementById('registerUsername').value;
+  const email = document.getElementById('registerEmail').value;
+  const password = document.getElementById('registerPassword').value;
+  const firstName = document.getElementById('registerFirstName').value;
+  const lastName = document.getElementById('registerLastName').value;
+  
+  try {
+    const response = await fetch('/api/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, email, password, firstName, lastName })
+    });
+    
+    if (response.ok) {
+      alert('Регистрация успешна! Теперь вы можете войти.');
+      switchAuthTab('login');
+      
+      // Очищаем форму
+      document.getElementById('registerUsername').value = '';
+      document.getElementById('registerEmail').value = '';
+      document.getElementById('registerPassword').value = '';
+      document.getElementById('registerFirstName').value = '';
+      document.getElementById('registerLastName').value = '';
+    } else {
+      const error = await response.json();
+      alert(error.error || 'Ошибка регистрации');
+    }
+  } catch (error) {
+    console.error('Ошибка при регистрации:', error);
+    alert('Ошибка при регистрации');
+  }
+}
+
+async function logout() {
+  try {
+    const response = await fetch('/api/logout', {
+      method: 'POST'
+    });
+    
+    if (response.ok) {
+      currentUser = null;
+      updateMenu();
+      scheduleBtn.style.display = 'none';
+      loadCourses();
+      toggleMenu();
+    }
+  } catch (error) {
+    console.error('Ошибка при выходе:', error);
+  }
+}
+
+async function handleEnrollment() {
+  if (!currentUser) {
+    openModal('authModal');
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/courses/${currentCourseId}/enroll`, {
+      method: 'POST'
+    });
+    
+    if (response.ok) {
+      alert('Вы успешно записаны на курс!');
+      closeModal('courseModal');
+      loadCourses();
+    } else {
+      const error = await response.json();
+      alert(error.error || 'Ошибка при записи на курс');
+    }
+  } catch (error) {
+    console.error('Ошибка при записи на курс:', error);
+    alert('Ошибка при записи на курс');
+  }
+}
+
+async function handleAddCourse(e) {
+  e.preventDefault();
+  
+  if (!currentUser || currentUser.role !== 'teacher') {
+    alert('Только преподаватели могут добавлять курсы');
+    return;
+  }
+  
+  const name = document.getElementById('courseName').value;
+  const description = document.getElementById('courseDescriptionInput').value;
+  const category = document.getElementById('courseCategory').value;
+  const level = document.getElementById('courseLevelInput').value;
+  const maxStudents = document.getElementById('courseMaxStudents').value;
+  
+  // Собираем расписание
+  const schedule = [];
+  document.querySelectorAll('#scheduleItems .schedule-item').forEach(item => {
+    const day = item.querySelector('[name="day"]').value;
+    const start_time = item.querySelector('[name="start_time"]').value;
+    const end_time = item.querySelector('[name="end_time"]').value;
+    
+    if (day && start_time && end_time) {
+      schedule.push({ day, start_time, end_time });
+    }
+  });
+  
+  if (schedule.length === 0) {
+    alert('Добавьте хотя бы одно время проведения занятий');
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/courses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name, description, category, level, max_students: maxStudents, schedule })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      alert('Курс успешно добавлен!');
+      closeModal('addCourseModal');
+      loadCourses();
+      
+      // Очищаем форму
+      document.getElementById('addCourseForm').reset();
+      document.getElementById('scheduleItems').innerHTML = `
+        <div class="form-group schedule-item">
+          <div class="form-group">
+            <label class="form-label">День недели</label>
+            <select class="form-control" name="day" required>
+              <option value="">Выберите день</option>
+              <option>Понедельник</option>
+              <option>Вторник</option>
+              <option>Среда</option>
+              <option>Четверг</option>
+              <option>Пятница</option>
+              <option>Суббота</option>
+              <option>Воскресенье</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Время начала</label>
+            <input type="time" class="form-control" name="start_time" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Время окончания</label>
+            <input type="time" class="form-control" name="end_time" required>
+          </div>
+        </div>
+      `;
+    } else {
+      const error = await response.json();
+      alert(error.error || 'Ошибка при добавлении курса');
+    }
+  } catch (error) {
+    console.error('Ошибка при добавлении курса:', error);
+    alert('Ошибка при добавлении курса');
+  }
+}
+</script>
+</body>
+</html>
