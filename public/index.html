@@ -993,12 +993,38 @@
           { icon: 'fa-sign-out-alt', text: 'Выйти', action: logout }
         ];
         
-        if (currentUser.role === 'teacher') {
-          items.unshift(
-            { icon: 'fa-plus', text: 'Добавить курс', action: () => { openModal('addCourseModal'); } }
-          );
+         if (currentUser) {
+    // Для всех авторизованных
+    items.push(
+      { icon: 'fa-calendar-alt', text: 'Расписание', action: () => window.location.href = '/schedule.html' },
+      { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => window.location.href = '/teachers.html' },
+      { icon: 'fa-envelope', text: 'Контакты', action: () => window.location.href = '/contacts.html' }
+    );
+
+    // Только для преподавателей
+    if (currentUser.role === 'teacher') {
+      items.unshift({
+        icon: 'fa-plus',
+        text: 'Добавить курс',
+        action: () => {
+          console.log("Открываем модальное окно добавления"); // Логирование
+          openModal('addCourseModal');
+          toggleMenu();
         }
-        
+      });
+    }
+     // Кнопка выхода для всех
+    items.push({ icon: 'fa-sign-out-alt', text: 'Выйти', action: logout });
+
+  } else {
+    // Для гостей
+    items.push(
+      { icon: 'fa-sign-in-alt', text: 'Войти', action: () => { openModal('authModal'); switchAuthTab('login'); } },
+      { icon: 'fa-user-plus', text: 'Регистрация', action: () => { openModal('authModal'); switchAuthTab('register'); } },
+      { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => window.location.href = '/teachers.html' },
+      { icon: 'fa-envelope', text: 'Контакты', action: () => window.location.href = '/contacts.html' }
+    );
+  }    
         items.forEach(item => {
           const li = document.createElement('li');
           const a = document.createElement('a');
@@ -1405,7 +1431,7 @@ async function handleRegister(e) {
         role: isTeacher ? 'teacher' : 'student'
       })
     });
-    
+
     if (response.ok) {
       alert('Регистрация успешна! Теперь вы можете войти.');
       switchAuthTab('login');
