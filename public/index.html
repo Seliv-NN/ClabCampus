@@ -537,7 +537,23 @@
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(110, 69, 226, 0.1);
     }
+.form-check {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
 
+.form-check-input {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.form-check-label {
+  cursor: pointer;
+  user-select: none;
+}
     /* Аутентификация */
     .auth-tabs {
       display: flex;
@@ -735,31 +751,37 @@
           </div>
         </form>
         
-        <form id="registerForm" class="auth-form">
-          <div class="form-group">
-            <label class="form-label">Имя пользователя</label>
-            <input type="text" class="form-control" id="registerUsername" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Email</label>
-            <input type="email" class="form-control" id="registerEmail" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Пароль</label>
-            <input type="password" class="form-control" id="registerPassword" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Имя</label>
-            <input type="text" class="form-control" id="registerFirstName">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Фамилия</label>
-            <input type="text" class="form-control" id="registerLastName">
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn">Зарегистрироваться</button>
-          </div>
-        </form>
+<form id="registerForm" class="auth-form">
+  <div class="form-group">
+    <label class="form-label">Имя пользователя</label>
+    <input type="text" class="form-control" id="registerUsername" required>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Email</label>
+    <input type="email" class="form-control" id="registerEmail" required>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Пароль</label>
+    <input type="password" class="form-control" id="registerPassword" required>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Имя</label>
+    <input type="text" class="form-control" id="registerFirstName">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Фамилия</label>
+    <input type="text" class="form-control" id="registerLastName">
+  </div>
+  <div class="form-group">
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input" id="registerIsTeacher">
+      <label class="form-check-label" for="registerIsTeacher">Я преподаватель</label>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn">Зарегистрироваться</button>
+  </div>
+</form>
       </div>
     </div>
   </div>
@@ -1366,6 +1388,7 @@ async function handleRegister(e) {
   const password = document.getElementById('registerPassword').value;
   const firstName = document.getElementById('registerFirstName').value;
   const lastName = document.getElementById('registerLastName').value;
+  const isTeacher = document.getElementById('registerIsTeacher').checked;
   
   try {
     const response = await fetch('/api/register', {
@@ -1373,7 +1396,14 @@ async function handleRegister(e) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ username, email, password, firstName, lastName })
+      body: JSON.stringify({ 
+        username, 
+        email, 
+        password, 
+        firstName, 
+        lastName,
+        role: isTeacher ? 'teacher' : 'student'
+      })
     });
     
     if (response.ok) {
@@ -1381,11 +1411,7 @@ async function handleRegister(e) {
       switchAuthTab('login');
       
       // Очищаем форму
-      document.getElementById('registerUsername').value = '';
-      document.getElementById('registerEmail').value = '';
-      document.getElementById('registerPassword').value = '';
-      document.getElementById('registerFirstName').value = '';
-      document.getElementById('registerLastName').value = '';
+      document.getElementById('registerForm').reset();
     } else {
       const error = await response.json();
       alert(error.error || 'Ошибка регистрации');
