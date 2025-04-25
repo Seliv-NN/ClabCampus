@@ -1013,6 +1013,17 @@
           menuList.appendChild(li);
         });
       }
+      const li = document.createElement('li');
+const a = document.createElement('a');
+a.href = '#';
+a.innerHTML = `<i class="fas fa-plus"></i> Добавить курс (тест)`;
+a.addEventListener('click', (e) => {
+  e.preventDefault();
+  openModal('addCourseModal');
+  toggleMenu();
+});
+li.appendChild(a);
+menuList.appendChild(li);
     }
 
     // Функции для работы с курсами
