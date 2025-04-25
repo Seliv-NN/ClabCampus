@@ -537,23 +537,7 @@
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(110, 69, 226, 0.1);
     }
-.form-check {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
 
-.form-check-input {
-  width: 18px;
-  height: 18px;
-  margin-right: 10px;
-  cursor: pointer;
-}
-
-.form-check-label {
-  cursor: pointer;
-  user-select: none;
-}
     /* Аутентификация */
     .auth-tabs {
       display: flex;
@@ -751,37 +735,31 @@
           </div>
         </form>
         
-<form id="registerForm" class="auth-form">
-  <div class="form-group">
-    <label class="form-label">Имя пользователя</label>
-    <input type="text" class="form-control" id="registerUsername" required>
-  </div>
-  <div class="form-group">
-    <label class="form-label">Email</label>
-    <input type="email" class="form-control" id="registerEmail" required>
-  </div>
-  <div class="form-group">
-    <label class="form-label">Пароль</label>
-    <input type="password" class="form-control" id="registerPassword" required>
-  </div>
-  <div class="form-group">
-    <label class="form-label">Имя</label>
-    <input type="text" class="form-control" id="registerFirstName">
-  </div>
-  <div class="form-group">
-    <label class="form-label">Фамилия</label>
-    <input type="text" class="form-control" id="registerLastName">
-  </div>
-  <div class="form-group">
-    <div class="form-check">
-      <input type="checkbox" class="form-check-input" id="registerIsTeacher">
-      <label class="form-check-label" for="registerIsTeacher">Я преподаватель</label>
-    </div>
-  </div>
-  <div class="form-actions">
-    <button type="submit" class="btn">Зарегистрироваться</button>
-  </div>
-</form>
+        <form id="registerForm" class="auth-form">
+          <div class="form-group">
+            <label class="form-label">Имя пользователя</label>
+            <input type="text" class="form-control" id="registerUsername" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" id="registerEmail" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Пароль</label>
+            <input type="password" class="form-control" id="registerPassword" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Имя</label>
+            <input type="text" class="form-control" id="registerFirstName">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Фамилия</label>
+            <input type="text" class="form-control" id="registerLastName">
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn">Зарегистрироваться</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -992,38 +970,35 @@
           { icon: 'fa-envelope', text: 'Контакты', action: () => { window.location.href = '/contacts.html'; } },
           { icon: 'fa-sign-out-alt', text: 'Выйти', action: logout }
         ];
-  if (currentUser) {
-    // Для всех авторизованных
-    items.push(
-      { icon: 'fa-calendar-alt', text: 'Расписание', action: () => window.location.href = '/schedule.html' },
-      { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => window.location.href = '/teachers.html' },
-      { icon: 'fa-envelope', text: 'Контакты', action: () => window.location.href = '/contacts.html' }
-    );
-    
-    // Только для преподавателей
-    if (currentUser.role === 'teacher') {
-      items.unshift({
-        icon: 'fa-plus',
-        text: 'Добавить курс',
-        action: () => {
-          console.log("Открываем модальное окно добавления"); // Логирование
-          openModal('addCourseModal');
-          toggleMenu();
+        
+        if (currentUser.role === 'teacher') {
+          items.unshift(
+            { icon: 'fa-plus', text: 'Добавить курс', action: () => { openModal('addCourseModal'); } }
+          );
         }
-      });
-    }
-     // Кнопка выхода для всех
-    items.push({ icon: 'fa-sign-out-alt', text: 'Выйти', action: logout });
-
-  } else {
-    // Для гостей
-    items.push(
-      { icon: 'fa-sign-in-alt', text: 'Войти', action: () => { openModal('authModal'); switchAuthTab('login'); } },
-      { icon: 'fa-user-plus', text: 'Регистрация', action: () => { openModal('authModal'); switchAuthTab('register'); } },
-      { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => window.location.href = '/teachers.html' },
-      { icon: 'fa-envelope', text: 'Контакты', action: () => window.location.href = '/contacts.html' }
-    );
-  }    
+        
+        items.forEach(item => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = '#';
+          a.innerHTML = `<i class="fas ${item.icon}"></i> ${item.text}`;
+          a.addEventListener('click', (e) => {
+            e.preventDefault();
+            item.action();
+            toggleMenu();
+          });
+          li.appendChild(a);
+          menuList.appendChild(li);
+        });
+      } else {
+        // Меню для гостя
+        const items = [
+          { icon: 'fa-sign-in-alt', text: 'Войти', action: () => { openModal('authModal'); switchAuthTab('login'); } },
+          { icon: 'fa-user-plus', text: 'Регистрация', action: () => { openModal('authModal'); switchAuthTab('register'); } },
+          { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => { window.location.href = '/teachers.html'; } },
+          { icon: 'fa-envelope', text: 'Контакты', action: () => { window.location.href = '/contacts.html'; } }
+        ];
+        
         items.forEach(item => {
           const li = document.createElement('li');
           const a = document.createElement('a');
@@ -1106,83 +1081,7 @@
         
         clubsContainer.appendChild(card);
       });
-      
-     // Настройка кнопок "Подробнее" и "Записаться"
-  document.querySelectorAll('.details-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      const courseId = e.currentTarget.dataset.id;
-      showCourseDetails(courseId);
-    });
-  });
-  
-  document.querySelectorAll('.signup-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      const courseId = e.currentTarget.dataset.id;
-      const courseName = e.currentTarget.closest('.club-card').querySelector('.club-name').textContent;
-      prepareSignup(courseId, courseName);
-    });
-  });
-}
-
-function getScheduleText(schedule) {
-  if (!schedule || schedule.length === 0) return 'Расписание не указано';
-  
-  const daysMap = {
-    'Понедельник': 'Пн',
-    'Вторник': 'Вт',
-    'Среда': 'Ср',
-    'Четверг': 'Чт',
-    'Пятница': 'Пт',
-    'Суббота': 'Сб',
-    'Воскресенье': 'Вс'
-  };
-  
-  const days = schedule.map(s => daysMap[s.day] || s.day).join('/');
-  const time = schedule[0].start_time;
-  return `${days} ${time}`;
-}
-
-async function showCourseDetails(courseId) {
-  const course = await getCourseDetails(courseId);
-  if (!course) {
-    alert('Не удалось загрузить информацию о курсе');
-    return;
-  }
-  
-  currentCourseId = courseId;
-  
-  // Заполняем модальное окно данными о курсе
-  document.getElementById('courseModalTitle').textContent = course.name;
-  document.getElementById('courseTeacher').textContent = `Преподаватель: ${course.teacher_name || 'не указан'}`;
-  document.getElementById('courseDescription').textContent = `Описание: ${course.description || 'отсутствует'}`;
-  
-  let levelText = '';
-  if (course.level === 'beginner') levelText = 'Начинающий';
-  else if (course.level === 'intermediate') levelText = 'Средний';
-  else levelText = 'Продвинутый';
-  document.getElementById('courseLevel').textContent = `Уровень: ${levelText}`;
-  
-  document.getElementById('courseSpots').textContent = `Места: ${course.enrolled_count || 0}/${course.max_students}`;
-  
-  // Заполняем расписание
-  const scheduleContainer = document.getElementById('courseSchedule');
-  scheduleContainer.innerHTML = '';
-  
-  if (course.schedule && course.schedule.length > 0) {
-    course.schedule.forEach(s => {
-      const item = document.createElement('div');
-      item.className = 'schedule-item';
-      item.innerHTML = `
-        <span>${s.day}</span>
-        <span>${s.start_time} - ${s.end_time}</span>
-      `;
-      scheduleContainer.appendChild(item);
-    });
-  } else {
-    scheduleContainer.innerHTML = '<p>Расписание не указано</p>';
-  }
-  
-  // Настраиваем кнопку записи
+// Настраиваем кнопку записи
   const enrollBtn = document.getElementById('enrollBtn');
   if (course.isEnrolled) {
     enrollBtn.textContent = 'Вы уже записаны';
@@ -1391,7 +1290,6 @@ async function handleRegister(e) {
   const password = document.getElementById('registerPassword').value;
   const firstName = document.getElementById('registerFirstName').value;
   const lastName = document.getElementById('registerLastName').value;
-  const isTeacher = document.getElementById('registerIsTeacher').checked;
   
   try {
     const response = await fetch('/api/register', {
@@ -1399,22 +1297,19 @@ async function handleRegister(e) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ 
-        username, 
-        email, 
-        password, 
-        firstName, 
-        lastName,
-        role: isTeacher ? 'teacher' : 'student'
-      })
+      body: JSON.stringify({ username, email, password, firstName, lastName })
     });
-
+    
     if (response.ok) {
       alert('Регистрация успешна! Теперь вы можете войти.');
       switchAuthTab('login');
       
       // Очищаем форму
-      document.getElementById('registerForm').reset();
+      document.getElementById('registerUsername').value = '';
+      document.getElementById('registerEmail').value = '';
+      document.getElementById('registerPassword').value = '';
+      document.getElementById('registerFirstName').value = '';
+      document.getElementById('registerLastName').value = '';
     } else {
       const error = await response.json();
       alert(error.error || 'Ошибка регистрации');
