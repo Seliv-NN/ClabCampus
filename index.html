@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClubCampus | Каталог кружков</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #6e45e2;
+      --secondary: #88d3ce;
+      --accent: #ff7e5f;
+      --light: #f8f9fa;
+      --dark: #1a1a2e;
+      --gray: #6c757d;
+      --light-gray: #f1f3f5;
+      --glass: rgba(255, 255, 255, 0.15);
+      --transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: var(--light-gray);
+      color: var(--dark);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Шапка */
+    header {
+      background: white;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Боковое меню */
+    .menu-toggle {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 100;
+    }
+
+    .menu-toggle span {
+      width: 25px;
+      height: 3px;
+      background: var(--primary);
+      margin: 3px 0;
+      transition: var(--transition);
+    }
+
+    .menu-toggle.active span:nth-child(1) {
+      transform: translateY(8px) rotate(45deg);
+    }
+
+    .menu-toggle.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .menu-toggle.active span:nth-child(3) {
+      transform: translateY(-8px) rotate(-45deg);
+    }
+
+    .sidebar-menu {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background: white;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      transition: var(--transition);
+      z-index: 99;
+      padding: 80px 20px 20px;
+    }
+
+    .sidebar-menu.active {
+      right: 0;
+    }
+
+    .menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      z-index: 98;
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition);
+    }
+
+    .menu-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .menu-list {
+      list-style: none;
+    }
+
+    .menu-list li {
+      margin-bottom: 15px;
+    }
+
+    .menu-list a {
+      text-decoration: none;
+      color: var(--dark);
+      font-weight: 600;
+      display: block;
+      padding: 10px;
+      border-radius: 8px;
+      transition: var(--transition);
+    }
+
+    .menu-list a:hover {
+      background: var(--light-gray);
+      color: var(--primary);
+      transform: translateX(5px);
+    }
+
+    .menu-list a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Кнопки */
+    .btn {
+      background: linear-gradient(45deg, var(--primary), var(--accent));
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(110, 69, 226, 0.3);
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(110, 69, 226, 0.4);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+
+    /* Основной контент */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .page-header {
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    h1 {
+      font-size: 32px;
+      background: linear-gradient(to right, var(--dark), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--gray);
+      max-width: 600px;
+    }
+
+    /* Фильтры */
+    .filters {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      position: relative;
+    }
+
+    .filter-select {
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background: white;
+      appearance: none;
+      padding-right: 35px;
+      cursor: pointer;
+      min-width: 180px;
+    }
+
+    .filter-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--gray);
+    }
+
+    .search-bar {
+      flex-grow: 1;
+      max-width: 400px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 15px 10px 40px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray);
+    }
+
+    /* Карточки кружков */
+    .clubs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .club-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .club-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .club-image {
+      height: 150px;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 40px;
+      position: relative;
+    }
+
+    .club-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(5px);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .club-content {
+      padding: 20px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .club-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--dark);
+    }
+
+    .club-teacher {
+      font-size: 14px;
+      color: var(--gray);
+      margin-bottom: 15px;
+    }
+
+    .club-meta {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      font-size: 13px;
+    }
+
+    .club-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--gray);
+    }
+
+    .club-meta-item i {
+      color: var(--accent);
+    }
+
+    .club-description {
+      font-size: 14px;
+      color: var(--gray);
+      margin-bottom: 20px;
+      line-height: 1.5;
+      flex-grow: 1;
+    }
+
+    .club-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+    }
+
+    .details-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 0;
+    }
+
+    .signup-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .signup-btn:hover {
+      background: var(--accent);
+    }
+
+    /* Модальные окна */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      transform: translateY(20px);
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      position: relative;
+    }
+
+    .modal.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      z-index: 2;
+    }
+
+    .close-btn:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .modal-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    /* Формы */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(110, 69, 226, 0.1);
+    }
+
+    /* Аутентификация */
+    .auth-tabs {
+      display: flex;
+      border-bottom: 1px solid #eee;
+    }
+
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      color: var(--gray);
+    }
+
+    .auth-tab.active {
+      color: var(--primary);
+    }
+
+    .auth-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--primary);
+    }
+
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: block;
+    }
+
+    .form-actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* Детали курса */
+    .course-details {
+      margin-bottom: 20px;
+    }
+
+    .course-schedule {
+      margin-top: 20px;
+    }
+
+    .schedule-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    /* Адаптив */
+    @media (max-width: 768px) {
+      h1 { font-size: 28px; }
+      .subtitle { font-size: 14px; }
+      .filters { flex-direction: column; }
+      .search-bar { max-width: 100%; }
+      .modal-content { width: 95%; }
+    }
+
+    @media (max-width: 576px) {
+      .sidebar-menu {
+        width: 100%;
+        right: -100%;
+      }
+      .sidebar-menu.active {
+        right: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Шапка с навигацией -->
+  <header>
+    <div class="header-container">
+      <div class="logo">ClubCampus</div>
+      
+      <div class="menu-toggle" id="menuToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Боковое меню -->
+  <div class="sidebar-menu" id="sidebarMenu">
+    <ul class="menu-list" id="menuList">
+      <!-- Меню будет заполнено динамически в зависимости от статуса авторизации -->
+    </ul>
+  </div>
+  <div class="menu-overlay" id="menuOverlay"></div>
+
+  <!-- Основной контент -->
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <h1>Каталог кружков</h1>
+        <p class="subtitle">Выберите интересное направление и присоединяйтесь к сообществу единомышленников</p>
+      </div>
+      <button class="btn btn-outline" id="scheduleBtn" style="display: none;">
+        <i class="fas fa-calendar-alt"></i> Расписание
+      </button>
+    </div>
+
+    <!-- Категории -->
+    <div class="categories">
+      <button class="category-btn active">Все курсы</button>
+      <button class="category-btn">Программирование</button>
+      <button class="category-btn">Дизайн</button>
+      <button class="category-btn">Иностранные языки</button>
+      <button class="category-btn">Наука</button>
+      <button class="category-btn">Искусство</button>
+    </div>
+
+    <!-- Фильтры -->
+    <div class="filters">
+      <div class="filter-group">
+        <select class="filter-select" id="categoryFilter">
+          <option value="">Все категории</option>
+          <option>Программирование</option>
+          <option>Дизайн</option>
+          <option>Иностранные языки</option>
+          <option>Наука</option>
+          <option>Искусство</option>
+        </select>
+        <i class="fas fa-chevron-down filter-icon"></i>
+      </div>
+      <div class="filter-group">
+        <select class="filter-select" id="timeFilter">
+          <option value="">Любое время</option>
+          <option>Утро (9:00-12:00)</option>
+          <option>День (12:00-17:00)</option>
+          <option>Вечер (17:00-21:00)</option>
+        </select>
+        <i class="fas fa-chevron-down filter-icon"></i>
+      </div>
+      <div class="filter-group">
+        <select class="filter-select" id="levelFilter">
+          <option value="">Любой уровень</option>
+          <option>Начинающий</option>
+          <option>Средний</option>
+          <option>Продвинутый</option>
+        </select>
+        <i class="fas fa-chevron-down filter-icon"></i>
+      </div>
+      <div class="search-bar">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="search-input" placeholder="Поиск курсов..." id="searchInput">
+      </div>
+    </div>
+
+    <!-- Сетка курсов -->
+    <div class="clubs-grid" id="clubsContainer">
+      <!-- Карточки будут загружены динамически -->
+    </div>
+  </main>
+
+  <!-- Модальное окно авторизации/регистрации -->
+  <div class="modal" id="authModal">
+    <div class="modal-content">
+      <div class="close-btn" onclick="closeModal('authModal')">
+        <i class="fas fa-times"></i>
+      </div>
+      <div class="modal-header">
+        <h3 class="modal-title">Вход / Регистрация</h3>
+      </div>
+      <div class="modal-body">
+        <div class="auth-tabs">
+          <div class="auth-tab active" onclick="switchAuthTab('login')">Вход</div>
+          <div class="auth-tab" onclick="switchAuthTab('register')">Регистрация</div>
+        </div>
+        
+        <form id="loginForm" class="auth-form active">
+          <div class="form-group">
+            <label class="form-label">Имя пользователя</label>
+            <input type="text" class="form-control" id="loginUsername" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Пароль</label>
+            <input type="password" class="form-control" id="loginPassword" required>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn">Войти</button>
+          </div>
+        </form>
+        
+        <form id="registerForm" class="auth-form">
+          <div class="form-group">
+            <label class="form-label">Имя пользователя</label>
+            <input type="text" class="form-control" id="registerUsername" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" id="registerEmail" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Пароль</label>
+            <input type="password" class="form-control" id="registerPassword" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Имя</label>
+            <input type="text" class="form-control" id="registerFirstName">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Фамилия</label>
+            <input type="text" class="form-control" id="registerLastName">
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn">Зарегистрироваться</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно деталей курса -->
+  <div class="modal" id="courseModal">
+    <div class="modal-content">
+      <div class="close-btn" onclick="closeModal('courseModal')">
+        <i class="fas fa-times"></i>
+      </div>
+      <div class="modal-header">
+        <h3 class="modal-title" id="courseModalTitle">Название курса</h3>
+      </div>
+      <div class="modal-body">
+        <div class="course-details">
+          <p id="courseTeacher">Преподаватель: </p>
+          <p id="courseDescription">Описание: </p>
+          <p id="courseLevel">Уровень: </p>
+          <p id="courseSpots">Места: </p>
+        </div>
+        
+        <div class="course-schedule">
+          <h4>Расписание:</h4>
+          <div id="courseSchedule">
+            <!-- Расписание будет заполнено динамически -->
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button class="btn" id="enrollBtn">Записаться</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно добавления курса (для преподавателей) -->
+  <div class="modal" id="addCourseModal">
+    <div class="modal-content">
+      <div class="close-btn" onclick="closeModal('addCourseModal')">
+        <i class="fas fa-times"></i>
+      </div>
+      <div class="modal-header">
+        <h3 class="modal-title">Добавить новый курс</h3>
+      </div>
+      <div class="modal-body">
+        <form id="addCourseForm">
+          <div class="form-group">
+            <label class="form-label">Название курса</label>
+            <input type="text" class="form-control" id="courseName" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Описание</label>
+            <textarea class="form-control" id="courseDescriptionInput" rows="3" required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Категория</label>
+            <select class="form-control" id="courseCategory" required>
+              <option value="">Выберите категорию</option>
+              <option>Программирование</option>
+              <option>Дизайн</option>
+              <option>Иностранные языки</option>
+              <option>Наука</option>
+              <option>Искусство</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Уровень</label>
+            <select class="form-control" id="courseLevelInput" required>
+              <option value="">Выберите уровень</option>
+              <option>beginner</option>
+              <option>intermediate</option>
+              <option>advanced</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Максимальное количество студентов</label>
+            <input type="number" class="form-control" id="courseMaxStudents" required min="1">
+          </div>
+          
+          <div id="scheduleItems">
+            <div class="form-group schedule-item">
+              <div class="form-group">
+                <label class="form-label">День недели</label>
+                <select class="form-control" name="day" required>
+                  <option value="">Выберите день</option>
+                  <option>Понедельник</option>
+                  <option>Вторник</option>
+                  <option>Среда</option>
+                  <option>Четверг</option>
+                  <option>Пятница</option>
+                  <option>Суббота</option>
+                  <option>Воскресенье</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Время начала</label>
+                <input type="time" class="form-control" name="start_time" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Время окончания</label>
+                <input type="time" class="form-control" name="end_time" required>
+              </div>
+            </div>
+          </div>
+          
+          <button type="button" class="btn btn-outline" onclick="addScheduleItem()">
+            <i class="fas fa-plus"></i> Добавить время
+          </button>
+          
+          <div class="form-actions">
+            <button type="submit" class="btn">Создать курс</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+// Глобальные переменные
+let currentUser = null;
+let currentCourseId = null;
+let allCourses = [];
+
+// DOM элементы
+const menuToggle = document.getElementById('menuToggle');
+const sidebarMenu = document.getElementById('sidebarMenu');
+const menuOverlay = document.getElementById('menuOverlay');
+const menuList = document.getElementById('menuList');
+const clubsContainer = document.getElementById('clubsContainer');
+const scheduleBtn = document.getElementById('scheduleBtn');
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+  // Загружаем курсы
+  loadCourses();
+  
+  // Проверяем авторизацию
+  checkAuth();
+  
+  // Настройка бокового меню
+  menuToggle.addEventListener('click', toggleMenu);
+  menuOverlay.addEventListener('click', toggleMenu);
+  
+  // Настройка формы авторизации
+  document.getElementById('loginForm').addEventListener('submit', handleLogin);
+  document.getElementById('registerForm').addEventListener('submit', handleRegister);
+  document.getElementById('enrollBtn').addEventListener('click', handleEnrollment);
+  document.getElementById('addCourseForm').addEventListener('submit', handleAddCourse);
+  
+  // Настройка фильтров
+  document.getElementById('categoryFilter').addEventListener('change', filterCourses);
+  document.getElementById('timeFilter').addEventListener('change', filterCourses);
+  document.getElementById('levelFilter').addEventListener('change', filterCourses);
+  document.getElementById('searchInput').addEventListener('input', filterCourses);
+  
+  // Настройка категорий
+  document.querySelectorAll('.category-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterCourses();
+    });
+  });
+  
+  // Настройка кнопки расписания
+  scheduleBtn.addEventListener('click', () => {
+    window.location.href = '/schedule.html';
+  });
+});
+
+// Функции для работы с модальными окнами
+function openModal(modalId) {
+  document.getElementById(modalId).classList.add('active');
+}
+
+function closeModal(modalId) {
+  document.getElementById(modalId).classList.remove('active');
+}
+
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  
+  if (tab === 'login') {
+    document.querySelector('.auth-tab:nth-child(1)').classList.add('active');
+    document.getElementById('loginForm').classList.add('active');
+  } else {
+    document.querySelector('.auth-tab:nth-child(2)').classList.add('active');
+    document.getElementById('registerForm').classList.add('active');
+  }
+}
+
+// Функции для работы с боковым меню
+function toggleMenu() {
+  menuToggle.classList.toggle('active');
+  sidebarMenu.classList.toggle('active');
+  menuOverlay.classList.toggle('active');
+}
+
+function updateMenu() {
+  menuList.innerHTML = '';
+  
+  if (currentUser) {
+    // Меню для авторизованного пользователя
+    const items = [
+      { icon: 'fa-calendar-alt', text: 'Расписание', action: () => { window.location.href = '/schedule.html'; } },
+      { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => { window.location.href = '/teachers.html'; } },
+      { icon: 'fa-envelope', text: 'Контакты', action: () => { window.location.href = '/contacts.html'; } },
+      { icon: 'fa-sign-out-alt', text: 'Выйти', action: logout }
+    ];
+    
+    if (currentUser.role === 'teacher') {
+      items.unshift(
+        { icon: 'fa-plus', text: 'Добавить курс', action: () => { openModal('addCourseModal'); } }
+      );
+    }
+    
+    items.forEach(item => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#';
+      a.innerHTML = `<i class="fas ${item.icon}"></i> ${item.text}`;
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        item.action();
+        toggleMenu();
+      });
+      li.appendChild(a);
+      menuList.appendChild(li);
+    });
+  } else {
+    // Меню для гостя
+    const items = [
+      { icon: 'fa-sign-in-alt', text: 'Войти', action: () => { openModal('authModal'); switchAuthTab('login'); } },
+      { icon: 'fa-user-plus', text: 'Регистрация', action: () => { openModal('authModal'); switchAuthTab('register'); } },
+      { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => { window.location.href = '/teachers.html'; } },
+      { icon: 'fa-envelope', text: 'Контакты', action: () => { window.location.href = '/contacts.html'; } }
+    ];
+    
+    items.forEach(item => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#';
+      a.innerHTML = `<i class="fas ${item.icon}"></i> ${item.text}`;
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        item.action();
+        toggleMenu();
+      });
+      li.appendChild(a);
+      menuList.appendChild(li);
+    });
+  }
+}
+
+// Функции для работы с курсами
+function renderCourses(courses) {
+  allCourses = courses;
+  clubsContainer.innerHTML = '';
+  
+  courses.forEach(course => {
+    const card = document.createElement('div');
+    card.className = 'club-card';
+    card.dataset.category = course.category;
+    card.dataset.level = course.level;
+    
+    // Определяем время занятий для фильтрации
+    let timeClass = '';
+    course.schedule.forEach(s => {
+      const hour = parseInt(s.start_time.split(':')[0]);
+      if (hour >= 9 && hour < 12) timeClass = 'morning';
+      else if (hour >= 12 && hour < 17) timeClass = 'day';
+      else timeClass = 'evening';
+    });
+    card.dataset.time = timeClass;
+    
+    // Определяем иконку в зависимости от категории
+    let icon = 'fa-star';
+    if (course.category === 'Программирование') icon = 'fa-code';
+    else if (course.category === 'Дизайн') icon = 'fa-paint-brush';
+    else if (course.category === 'Иностранные языки') icon = 'fa-language';
+    else if (course.category === 'Наука') icon = 'fa-atom';
+    else if (course.category === 'Искусство') icon = 'fa-palette';
+    
+    // Определяем уровень сложности
+    let levelText = '';
+    if (course.level === 'beginner') levelText = 'Начинающий';
+    else if (course.level === 'intermediate') levelText = 'Средний';
+    else levelText = 'Продвинутый';
+    
+    // Создаем карточку курса
+    card.innerHTML = `
+      <div class="club-image">
+        <i class="fas ${icon}"></i>
+        <span class="club-badge">${levelText}</span>
+      </div>
+      <div class="club-content">
+        <h3 class="club-name">${course.name}</h3>
+        <p class="club-teacher">${course.teacher_name || 'Преподаватель не указан'}</p>
+        <div class="club-meta">
+          <div class="club-meta-item">
+            <i class="far fa-calendar-alt"></i> ${getScheduleText(course.schedule)}
+          </div>
+          <div class="club-meta-item">
+            <i class="fas fa-users"></i> ${course.enrolled_count || 0}/${course.max_students}
+          </div>
+        </div>
+        <p class="club-description">${course.description || 'Описание отсутствует'}</p>
+        <div class="club-actions">
+          <button class="details-btn" data-id="${course.id}">
+            <i class="fas fa-info-circle"></i> Подробнее
+          </button>
+          <button class="signup-btn" data-id="${course.id}">
+            Записаться
+          </button>
+        </div>
+      </div>
+    `;
+    
+    clubsContainer.appendChild(card);
+  });
+  
+  // Настройка кнопок "Подробнее" и "Записаться"
+  document.querySelectorAll('.details-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const courseId = e.currentTarget.dataset.id;
+      showCourseDetails(courseId);
+    });
+  });
+  
+  document.querySelectorAll('.signup-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const courseId = e.currentTarget.dataset.id;
+      const courseName = e.currentTarget.closest('.club-card').querySelector('.club-name').textContent;
+      prepareSignup(courseId, courseName);
+    });
+  });
+}
+
+function getScheduleText(schedule) {
+  if (!schedule || schedule.length === 0) return 'Расписание не указано';
+  
+  const daysMap = {
+    'Понедельник': 'Пн',
+    'Вторник': 'Вт',
+    'Среда': 'Ср',
+    'Четверг': 'Чт',
+    'Пятница': 'Пт',
+    'Суббота': 'Сб',
+    'Воскресенье': 'Вс'
+  };
+  
+  const days = schedule.map(s => daysMap[s.day] || s.day).join('/');
+  const time = schedule[0].start_time;
+  return `${days} ${time}`;
+}
+
+async function showCourseDetails(courseId) {
+  const course = await getCourseDetails(courseId);
+  if (!course) {
+    alert('Не удалось загрузить информацию о курсе');
+    return;
+  }
+  
+  currentCourseId = courseId;
+  
+  // Заполняем модальное окно данными о курсе
+  document.getElementById('courseModalTitle').textContent = course.name;
+  document.getElementById('courseTeacher').textContent = `Преподаватель: ${course.teacher_name || 'не указан'}`;
+  document.getElementById('courseDescription').textContent = `Описание: ${course.description || 'отсутствует'}`;
+  
+  let levelText = '';
+  if (course.level === 'beginner') levelText = 'Начинающий';
+  else if (course.level === 'intermediate') levelText = 'Средний';
+  else levelText = 'Продвинутый';
+  document.getElementById('courseLevel').textContent = `Уровень: ${levelText}`;
+  
+  document.getElementById('courseSpots').textContent = `Места: ${course.enrolled_count || 0}/${course.max_students}`;
+  
+  // Заполняем расписание
+  const scheduleContainer = document.getElementById('courseSchedule');
+  scheduleContainer.innerHTML = '';
+  
+  if (course.schedule && course.schedule.length > 0) {
+    course.schedule.forEach(s => {
+      const item = document.createElement('div');
+      item.className = 'schedule-item';
+      item.innerHTML = `
+        <span>${s.day}</span>
+        <span>${s.start_time} - ${s.end_time}</span>
+      `;
+      scheduleContainer.appendChild(item);
+    });
+  } else {
+    scheduleContainer.innerHTML = '<p>Расписание не указано</p>';
+  }
+  
+  // Настраиваем кнопку записи
+  const enrollBtn = document.getElementById('enrollBtn');
+  if (course.isEnrolled) {
+    enrollBtn.textContent = 'Вы уже записаны';
+    enrollBtn.disabled = true;
+  } else if (!course.canEnroll) {
+    if (currentUser) {
+      enrollBtn.textContent = 'Нет свободных мест';
+      enrollBtn.disabled = true;
+    } else {
+      enrollBtn.textContent = 'Войдите, чтобы записаться';
+      enrollBtn.onclick = () => {
+        closeModal('courseModal');
+        openModal('authModal');
+      };
+    }
+  } else {
+    enrollBtn.textContent = 'Записаться';
+    enrollBtn.disabled = false;
+    enrollBtn.onclick = handleEnrollment;
+  }
+  
+  openModal('courseModal');
+}
+
+function prepareSignup(courseId, courseName) {
+  if (!currentUser) {
+    openModal('authModal');
+    return;
+  }
+  
+  currentCourseId = courseId;
+  showCourseDetails(courseId);
+}
+
+function filterCourses() {
+  const categoryFilter = document.getElementById('categoryFilter').value;
+  const timeFilter = document.getElementById('timeFilter').value;
+  const levelFilter = document.getElementById('levelFilter').value;
+  const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+  const activeCategory = document.querySelector('.category-btn.active').textContent;
+  
+  const filteredCourses = allCourses.filter(course => {
+    // Фильтр по категории (из выпадающего списка)
+    if (categoryFilter && course.category !== categoryFilter) return false;
+    
+    // Фильтр по категории (из кнопок)
+    if (activeCategory !== 'Все курсы' && course.category !== activeCategory) return false;
+    
+    // Фильтр по уровню
+    if (levelFilter) {
+      let levelText = '';
+      if (course.level === 'beginner') levelText = 'Начинающий';
+      else if (course.level === 'intermediate') levelText = 'Средний';
+      else levelText = 'Продвинутый';
+      
+      if (levelText !== levelFilter) return false;
+    }
+    
+    // Фильтр по времени
+    if (timeFilter) {
+      let timeMatch = false;
+      course.schedule.forEach(s => {
+        const hour = parseInt(s.start_time.split(':')[0]);
+        if (timeFilter === 'Утро (9:00-12:00)' && hour >= 9 && hour < 12) timeMatch = true;
+        else if (timeFilter === 'День (12:00-17:00)' && hour >= 12 && hour < 17) timeMatch = true;
+        else if (timeFilter === 'Вечер (17:00-21:00)' && hour >= 17 && hour < 21) timeMatch = true;
+      });
+      if (!timeMatch) return false;
+    }
+    
+    // Фильтр по поиску
+    if (searchQuery) {
+      const nameMatch = course.name.toLowerCase().includes(searchQuery);
+      const descMatch = course.description.toLowerCase().includes(searchQuery);
+      const teacherMatch = course.teacher_name.toLowerCase().includes(searchQuery);
+      if (!nameMatch && !descMatch && !teacherMatch) return false;
+    }
+    
+    return true;
+  });
+  
+  renderCourses(filteredCourses);
+}
+
+function addScheduleItem() {
+  const scheduleItems = document.getElementById('scheduleItems');
+  const newItem = document.createElement('div');
+  newItem.className = 'form-group schedule-item';
+  newItem.innerHTML = `
+    <div class="form-group">
+      <label class="form-label">День недели</label>
+      <select class="form-control" name="day" required>
+        <option value="">Выберите день</option>
+        <option>Понедельник</option>
+        <option>Вторник</option>
+        <option>Среда</option>
+        <option>Четверг</option>
+        <option>Пятница</option>
+        <option>Суббота</option>
+        <option>Воскресенье</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Время начала</label>
+      <input type="time" class="form-control" name="start_time" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Время окончания</label>
+      <input type="time" class="form-control" name="end_time" required>
+    </div>
+    <button type="button" class="btn btn-sm btn-outline" onclick="this.parentNode.remove()">
+      <i class="fas fa-times"></i> Удалить
+    </button>
+  `;
+  scheduleItems.appendChild(newItem);
+}
+
+// Функции для работы с API
+async function checkAuth() {
+  try {
+    const response = await fetch('/api/me');
+    if (response.ok) {
+      const user = await response.json();
+      currentUser = user;
+      updateMenu();
+      scheduleBtn.style.display = 'inline-flex';
+    } else {
+      currentUser = null;
+      updateMenu();
+      scheduleBtn.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Ошибка при проверке авторизации:', error);
+  }
+}
+
+async function loadCourses() {
+  try {
+    const response = await fetch('/api/courses');
+    if (response.ok) {
+      const courses = await response.json();
+      renderCourses(courses);
+    } else {
+      console.error('Ошибка при загрузке курсов');
+    }
+  } catch (error) {
+    console.error('Ошибка при загрузке курсов:', error);
+  }
+}
+
+async function getCourseDetails(courseId) {
+  try {
+    const response = await fetch(`/api/courses/${courseId}`);
+    if (response.ok) {
+      return await response.json();
+    } else {
+      console.error('Ошибка при загрузке деталей курса');
+      return null;
+    }
+  } catch (error) {
+    console.error('Ошибка при загрузке деталей курса:', error);
+    return null;
+  }
+}
+
+// Обработчики форм
+async function handleLogin(e) {
+  e.preventDefault();
+  const username = document.getElementById('loginUsername').value;
+  const password = document.getElementById('loginPassword').value;
+  
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, password })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      currentUser = data.user;
+      updateMenu();
+      closeModal('authModal');
+      scheduleBtn.style.display = 'inline-flex';
+      loadCourses();
+      
+      // Очищаем форму
+      document.getElementById('loginUsername').value = '';
+      document.getElementById('loginPassword').value = '';
+    } else {
+      const error = await response.json();
+      alert(error.error || 'Ошибка авторизации');
+    }
+  } catch (error) {
+    console.error('Ошибка при авторизации:', error);
+    alert('Ошибка при авторизации');
+  }
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  const username = document.getElementById('registerUsername').value;
+  const email = document.getElementById('registerEmail').value;
+  const password = document.getElementById('registerPassword').value;
+  const firstName = document.getElementById('registerFirstName').value;
+  const lastName = document.getElementById('registerLastName').value;
+  
+  try {
+    const response = await fetch('/api/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, email, password, firstName, lastName })
+    });
+    
+    if (response.ok) {
+      alert('Регистрация успешна! Теперь вы можете войти.');
+      switchAuthTab('login');
+      
+      // Очищаем форму
+      document.getElementById('registerUsername').value = '';
+      document.getElementById('registerEmail').value = '';
+      document.getElementById('registerPassword').value = '';
+      document.getElementById('registerFirstName').value = '';
+      document.getElementById('registerLastName').value = '';
+    } else {
+      const error = await response.json();
+      alert(error.error || 'Ошибка регистрации');
+    }
+  } catch (error) {
+    console.error('Ошибка при регистрации:', error);
+    alert('Ошибка при регистрации');
+  }
+}
+
+async function logout() {
+  try {
+    const response = await fetch('/api/logout', {
+      method: 'POST'
+    });
+    
+    if (response.ok) {
+      currentUser = null;
+      updateMenu();
+      scheduleBtn.style.display = 'none';
+      loadCourses();
+      toggleMenu();
+    }
+  } catch (error) {
+    console.error('Ошибка при выходе:', error);
+  }
+}
+
+async function handleEnrollment() {
+  if (!currentUser) {
+    openModal('authModal');
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/courses/${currentCourseId}/enroll`, {
+      method: 'POST'
+    });
+    
+    if (response.ok) {
+      alert('Вы успешно записаны на курс!');
+      closeModal('courseModal');
+      loadCourses();
+    } else {
+      const error = await response.json();
+      alert(error.error || 'Ошибка при записи на курс');
+    }
+  } catch (error) {
+    console.error('Ошибка при записи на курс:', error);
+    alert('Ошибка при записи на курс');
+  }
+}
+
+async function handleAddCourse(e) {
+  e.preventDefault();
+  
+  if (!currentUser || currentUser.role !== 'teacher') {
+    alert('Только преподаватели могут добавлять курсы');
+    return;
+  }
+  
+  const name = document.getElementById('courseName').value;
+  const description = document.getElementById('courseDescriptionInput').value;
+  const category = document.getElementById('courseCategory').value;
+  const level = document.getElementById('courseLevelInput').value;
+  const maxStudents = document.getElementById('courseMaxStudents').value;
+  
+  // Собираем расписание
+  const schedule = [];
+  document.querySelectorAll('#scheduleItems .schedule-item').forEach(item => {
+    const day = item.querySelector('[name="day"]').value;
+    const start_time = item.querySelector('[name="start_time"]').value;
+    const end_time = item.querySelector('[name="end_time"]').value;
+    
+    if (day && start_time && end_time) {
+      schedule.push({ day, start_time, end_time });
+    }
+  });
+  
+  if (schedule.length === 0) {
+    alert('Добавьте хотя бы одно время проведения занятий');
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/courses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name, description, category, level, max_students: maxStudents, schedule })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      alert('Курс успешно добавлен!');
+      closeModal('addCourseModal');
+      loadCourses();
+      
+      // Очищаем форму
+      document.getElementById('addCourseForm').reset();
+      document.getElementById('scheduleItems').innerHTML = `
+        <div class="form-group schedule-item">
+          <div class="form-group">
+            <label class="form-label">День недели</label>
+            <select class="form-control" name="day" required>
+              <option value="">Выберите день</option>
+              <option>Понедельник</option>
+              <option>Вторник</option>
+              <option>Среда</option>
+              <option>Четверг</option>
+              <option>Пятница</option>
+              <option>Суббота</option>
+              <option>Воскресенье</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Время начала</label>
+            <input type="time" class="form-control" name="start_time" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Время окончания</label>
+            <input type="time" class="form-control" name="end_time" required>
+          </div>
+        </div>
+      `;
+    } else {
+      const error = await response.json();
+      alert(error.error || 'Ошибка при добавлении курса');
+    }
+  } catch (error) {
+    console.error('Ошибка при добавлении курса:', error);
+    alert('Ошибка при добавлении курса');
+  }
+}
+</script>
+</body>
+</html>
