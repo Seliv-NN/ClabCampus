@@ -965,32 +965,34 @@
       if (currentUser) {
         // Меню для авторизованного пользователя
         const items = [
-          { icon: 'fa-calendar-alt', text: 'Расписание', action: () => { window.location.href = '/schedule.html'; } },
-          { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => { window.location.href = '/teachers.html'; } },
-          { icon: 'fa-envelope', text: 'Контакты', action: () => { window.location.href = '/contacts.html'; } },
-          { icon: 'fa-sign-out-alt', text: 'Выйти', action: logout }
-        ];
-        
-        if (currentUser.role === 'teacher') {
-          items.unshift(
-            { icon: 'fa-plus', text: 'Добавить курс', action: () => { openModal('addCourseModal'); } }
-          );
-        }
-        
-        items.forEach(item => {
-          const li = document.createElement('li');
-          const a = document.createElement('a');
-          a.href = '#';
-          a.innerHTML = `<i class="fas ${item.icon}"></i> ${item.text}`;
-          a.addEventListener('click', (e) => {
-            e.preventDefault();
-            item.action();
-            toggleMenu();
-          });
-          li.appendChild(a);
-          menuList.appendChild(li);
-        });
-      } else {
+      { icon: 'fa-calendar-alt', text: 'Расписание', action: () => { window.location.href = '/schedule.html'; } },
+      { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => { window.location.href = '/teachers.html'; } },
+      { icon: 'fa-envelope', text: 'Контакты', action: () => { window.location.href = '/contacts.html'; } },
+      { icon: 'fa-sign-out-alt', text: 'Выйти', action: logout }
+    ];
+    
+    // Добавляем пункт меню только для преподавателей
+    if (currentUser.role === 'teacher') {
+      items.unshift(
+        { icon: 'fa-plus', text: 'Добавить курс', action: () => { openModal('addCourseModal'); } }
+      );
+    }
+    
+    // Остальной код остается без изменений
+    items.forEach(item => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#';
+      a.innerHTML = `<i class="fas ${item.icon}"></i> ${item.text}`;
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        item.action();
+        toggleMenu();
+      });
+      li.appendChild(a);
+      menuList.appendChild(li);
+    });
+  } else {
         // Меню для гостя
         const items = [
           { icon: 'fa-sign-in-alt', text: 'Войти', action: () => { openModal('authModal'); switchAuthTab('login'); } },
