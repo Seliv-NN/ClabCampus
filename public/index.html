@@ -992,7 +992,14 @@
           { icon: 'fa-envelope', text: 'Контакты', action: () => { window.location.href = '/contacts.html'; } },
           { icon: 'fa-sign-out-alt', text: 'Выйти', action: logout }
         ];
-
+  if (currentUser) {
+    // Для всех авторизованных
+    items.push(
+      { icon: 'fa-calendar-alt', text: 'Расписание', action: () => window.location.href = '/schedule.html' },
+      { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => window.location.href = '/teachers.html' },
+      { icon: 'fa-envelope', text: 'Контакты', action: () => window.location.href = '/contacts.html' }
+    );
+    
     // Только для преподавателей
     if (currentUser.role === 'teacher') {
       items.unshift({
@@ -1017,28 +1024,6 @@
       { icon: 'fa-envelope', text: 'Контакты', action: () => window.location.href = '/contacts.html' }
     );
   }    
-        items.forEach(item => {
-          const li = document.createElement('li');
-          const a = document.createElement('a');
-          a.href = '#';
-          a.innerHTML = `<i class="fas ${item.icon}"></i> ${item.text}`;
-          a.addEventListener('click', (e) => {
-            e.preventDefault();
-            item.action();
-            toggleMenu();
-          });
-          li.appendChild(a);
-          menuList.appendChild(li);
-        });
-      } else {
-        // Меню для гостя
-        const items = [
-          { icon: 'fa-sign-in-alt', text: 'Войти', action: () => { openModal('authModal'); switchAuthTab('login'); } },
-          { icon: 'fa-user-plus', text: 'Регистрация', action: () => { openModal('authModal'); switchAuthTab('register'); } },
-          { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => { window.location.href = '/teachers.html'; } },
-          { icon: 'fa-envelope', text: 'Контакты', action: () => { window.location.href = '/contacts.html'; } }
-        ];
-        
         items.forEach(item => {
           const li = document.createElement('li');
           const a = document.createElement('a');
