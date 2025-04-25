@@ -183,11 +183,48 @@
       background: transparent;
       border: 2px solid var(--primary);
       color: var(--primary);
+      box-shadow: none;
+    }
+
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(110, 69, 226, 0.4);
     }
 
     .btn-sm {
       padding: 6px 12px;
       font-size: 14px;
+    }
+
+    /* Категории */
+    .categories {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .category-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background: white;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 14px;
+    }
+
+    .category-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .category-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
     }
 
     /* Основной контент */
@@ -841,211 +878,211 @@
   </div>
 
   <script>
-// Глобальные переменные
-let currentUser = null;
-let currentCourseId = null;
-let allCourses = [];
+    // Глобальные переменные
+    let currentUser = null;
+    let currentCourseId = null;
+    let allCourses = [];
 
-// DOM элементы
-const menuToggle = document.getElementById('menuToggle');
-const sidebarMenu = document.getElementById('sidebarMenu');
-const menuOverlay = document.getElementById('menuOverlay');
-const menuList = document.getElementById('menuList');
-const clubsContainer = document.getElementById('clubsContainer');
-const scheduleBtn = document.getElementById('scheduleBtn');
+    // DOM элементы
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebarMenu = document.getElementById('sidebarMenu');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const menuList = document.getElementById('menuList');
+    const clubsContainer = document.getElementById('clubsContainer');
+    const scheduleBtn = document.getElementById('scheduleBtn');
 
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
-  // Загружаем курсы
-  loadCourses();
-  
-  // Проверяем авторизацию
-  checkAuth();
-  
-  // Настройка бокового меню
-  menuToggle.addEventListener('click', toggleMenu);
-  menuOverlay.addEventListener('click', toggleMenu);
-  
-  // Настройка формы авторизации
-  document.getElementById('loginForm').addEventListener('submit', handleLogin);
-  document.getElementById('registerForm').addEventListener('submit', handleRegister);
-  document.getElementById('enrollBtn').addEventListener('click', handleEnrollment);
-  document.getElementById('addCourseForm').addEventListener('submit', handleAddCourse);
-  
-  // Настройка фильтров
-  document.getElementById('categoryFilter').addEventListener('change', filterCourses);
-  document.getElementById('timeFilter').addEventListener('change', filterCourses);
-  document.getElementById('levelFilter').addEventListener('change', filterCourses);
-  document.getElementById('searchInput').addEventListener('input', filterCourses);
-  
-  // Настройка категорий
-  document.querySelectorAll('.category-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      filterCourses();
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      // Загружаем курсы
+      loadCourses();
+      
+      // Проверяем авторизацию
+      checkAuth();
+      
+      // Настройка бокового меню
+      menuToggle.addEventListener('click', toggleMenu);
+      menuOverlay.addEventListener('click', toggleMenu);
+      
+      // Настройка формы авторизации
+      document.getElementById('loginForm').addEventListener('submit', handleLogin);
+      document.getElementById('registerForm').addEventListener('submit', handleRegister);
+      document.getElementById('enrollBtn').addEventListener('click', handleEnrollment);
+      document.getElementById('addCourseForm').addEventListener('submit', handleAddCourse);
+      
+      // Настройка фильтров
+      document.getElementById('categoryFilter').addEventListener('change', filterCourses);
+      document.getElementById('timeFilter').addEventListener('change', filterCourses);
+      document.getElementById('levelFilter').addEventListener('change', filterCourses);
+      document.getElementById('searchInput').addEventListener('input', filterCourses);
+      
+      // Настройка категорий
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          filterCourses();
+        });
+      });
+      
+      // Настройка кнопки расписания
+      scheduleBtn.addEventListener('click', () => {
+        window.location.href = '/schedule.html';
+      });
     });
-  });
-  
-  // Настройка кнопки расписания
-  scheduleBtn.addEventListener('click', () => {
-    window.location.href = '/schedule.html';
-  });
-});
 
-// Функции для работы с модальными окнами
-function openModal(modalId) {
-  document.getElementById(modalId).classList.add('active');
-}
-
-function closeModal(modalId) {
-  document.getElementById(modalId).classList.remove('active');
-}
-
-function switchAuthTab(tab) {
-  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-  
-  if (tab === 'login') {
-    document.querySelector('.auth-tab:nth-child(1)').classList.add('active');
-    document.getElementById('loginForm').classList.add('active');
-  } else {
-    document.querySelector('.auth-tab:nth-child(2)').classList.add('active');
-    document.getElementById('registerForm').classList.add('active');
-  }
-}
-
-// Функции для работы с боковым меню
-function toggleMenu() {
-  menuToggle.classList.toggle('active');
-  sidebarMenu.classList.toggle('active');
-  menuOverlay.classList.toggle('active');
-}
-
-function updateMenu() {
-  menuList.innerHTML = '';
-  
-  if (currentUser) {
-    // Меню для авторизованного пользователя
-    const items = [
-      { icon: 'fa-calendar-alt', text: 'Расписание', action: () => { window.location.href = '/schedule.html'; } },
-      { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => { window.location.href = '/teachers.html'; } },
-      { icon: 'fa-envelope', text: 'Контакты', action: () => { window.location.href = '/contacts.html'; } },
-      { icon: 'fa-sign-out-alt', text: 'Выйти', action: logout }
-    ];
-    
-    if (currentUser.role === 'teacher') {
-      items.unshift(
-        { icon: 'fa-plus', text: 'Добавить курс', action: () => { openModal('addCourseModal'); } }
-      );
+    // Функции для работы с модальными окнами
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
     }
-    
-    items.forEach(item => {
-      const li = document.createElement('li');
-      const a = document.createElement('a');
-      a.href = '#';
-      a.innerHTML = `<i class="fas ${item.icon}"></i> ${item.text}`;
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        item.action();
-        toggleMenu();
-      });
-      li.appendChild(a);
-      menuList.appendChild(li);
-    });
-  } else {
-    // Меню для гостя
-    const items = [
-      { icon: 'fa-sign-in-alt', text: 'Войти', action: () => { openModal('authModal'); switchAuthTab('login'); } },
-      { icon: 'fa-user-plus', text: 'Регистрация', action: () => { openModal('authModal'); switchAuthTab('register'); } },
-      { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => { window.location.href = '/teachers.html'; } },
-      { icon: 'fa-envelope', text: 'Контакты', action: () => { window.location.href = '/contacts.html'; } }
-    ];
-    
-    items.forEach(item => {
-      const li = document.createElement('li');
-      const a = document.createElement('a');
-      a.href = '#';
-      a.innerHTML = `<i class="fas ${item.icon}"></i> ${item.text}`;
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        item.action();
-        toggleMenu();
-      });
-      li.appendChild(a);
-      menuList.appendChild(li);
-    });
-  }
-}
 
-// Функции для работы с курсами
-function renderCourses(courses) {
-  allCourses = courses;
-  clubsContainer.innerHTML = '';
-  
-  courses.forEach(course => {
-    const card = document.createElement('div');
-    card.className = 'club-card';
-    card.dataset.category = course.category;
-    card.dataset.level = course.level;
-    
-    // Определяем время занятий для фильтрации
-    let timeClass = '';
-    course.schedule.forEach(s => {
-      const hour = parseInt(s.start_time.split(':')[0]);
-      if (hour >= 9 && hour < 12) timeClass = 'morning';
-      else if (hour >= 12 && hour < 17) timeClass = 'day';
-      else timeClass = 'evening';
-    });
-    card.dataset.time = timeClass;
-    
-    // Определяем иконку в зависимости от категории
-    let icon = 'fa-star';
-    if (course.category === 'Программирование') icon = 'fa-code';
-    else if (course.category === 'Дизайн') icon = 'fa-paint-brush';
-    else if (course.category === 'Иностранные языки') icon = 'fa-language';
-    else if (course.category === 'Наука') icon = 'fa-atom';
-    else if (course.category === 'Искусство') icon = 'fa-palette';
-    
-    // Определяем уровень сложности
-    let levelText = '';
-    if (course.level === 'beginner') levelText = 'Начинающий';
-    else if (course.level === 'intermediate') levelText = 'Средний';
-    else levelText = 'Продвинутый';
-    
-    // Создаем карточку курса
-    card.innerHTML = `
-      <div class="club-image">
-        <i class="fas ${icon}"></i>
-        <span class="club-badge">${levelText}</span>
-      </div>
-      <div class="club-content">
-        <h3 class="club-name">${course.name}</h3>
-        <p class="club-teacher">${course.teacher_name || 'Преподаватель не указан'}</p>
-        <div class="club-meta">
-          <div class="club-meta-item">
-            <i class="far fa-calendar-alt"></i> ${getScheduleText(course.schedule)}
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    function switchAuthTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+      
+      if (tab === 'login') {
+        document.querySelector('.auth-tab:nth-child(1)').classList.add('active');
+        document.getElementById('loginForm').classList.add('active');
+      } else {
+        document.querySelector('.auth-tab:nth-child(2)').classList.add('active');
+        document.getElementById('registerForm').classList.add('active');
+      }
+    }
+
+    // Функции для работы с боковым меню
+    function toggleMenu() {
+      menuToggle.classList.toggle('active');
+      sidebarMenu.classList.toggle('active');
+      menuOverlay.classList.toggle('active');
+    }
+
+    function updateMenu() {
+      menuList.innerHTML = '';
+      
+      if (currentUser) {
+        // Меню для авторизованного пользователя
+        const items = [
+          { icon: 'fa-calendar-alt', text: 'Расписание', action: () => { window.location.href = '/schedule.html'; } },
+          { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => { window.location.href = '/teachers.html'; } },
+          { icon: 'fa-envelope', text: 'Контакты', action: () => { window.location.href = '/contacts.html'; } },
+          { icon: 'fa-sign-out-alt', text: 'Выйти', action: logout }
+        ];
+        
+        if (currentUser.role === 'teacher') {
+          items.unshift(
+            { icon: 'fa-plus', text: 'Добавить курс', action: () => { openModal('addCourseModal'); } }
+          );
+        }
+        
+        items.forEach(item => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = '#';
+          a.innerHTML = `<i class="fas ${item.icon}"></i> ${item.text}`;
+          a.addEventListener('click', (e) => {
+            e.preventDefault();
+            item.action();
+            toggleMenu();
+          });
+          li.appendChild(a);
+          menuList.appendChild(li);
+        });
+      } else {
+        // Меню для гостя
+        const items = [
+          { icon: 'fa-sign-in-alt', text: 'Войти', action: () => { openModal('authModal'); switchAuthTab('login'); } },
+          { icon: 'fa-user-plus', text: 'Регистрация', action: () => { openModal('authModal'); switchAuthTab('register'); } },
+          { icon: 'fa-chalkboard-teacher', text: 'Преподаватели', action: () => { window.location.href = '/teachers.html'; } },
+          { icon: 'fa-envelope', text: 'Контакты', action: () => { window.location.href = '/contacts.html'; } }
+        ];
+        
+        items.forEach(item => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = '#';
+          a.innerHTML = `<i class="fas ${item.icon}"></i> ${item.text}`;
+          a.addEventListener('click', (e) => {
+            e.preventDefault();
+            item.action();
+            toggleMenu();
+          });
+          li.appendChild(a);
+          menuList.appendChild(li);
+        });
+      }
+    }
+
+    // Функции для работы с курсами
+    function renderCourses(courses) {
+      allCourses = courses;
+      clubsContainer.innerHTML = '';
+      
+      courses.forEach(course => {
+        const card = document.createElement('div');
+        card.className = 'club-card';
+        card.dataset.category = course.category;
+        card.dataset.level = course.level;
+        
+        // Определяем время занятий для фильтрации
+        let timeClass = '';
+        course.schedule.forEach(s => {
+          const hour = parseInt(s.start_time.split(':')[0]);
+          if (hour >= 9 && hour < 12) timeClass = 'morning';
+          else if (hour >= 12 && hour < 17) timeClass = 'day';
+          else timeClass = 'evening';
+        });
+        card.dataset.time = timeClass;
+        
+        // Определяем иконку в зависимости от категории
+        let icon = 'fa-star';
+        if (course.category === 'Программирование') icon = 'fa-code';
+        else if (course.category === 'Дизайн') icon = 'fa-paint-brush';
+        else if (course.category === 'Иностранные языки') icon = 'fa-language';
+        else if (course.category === 'Наука') icon = 'fa-atom';
+        else if (course.category === 'Искусство') icon = 'fa-palette';
+        
+        // Определяем уровень сложности
+        let levelText = '';
+        if (course.level === 'beginner') levelText = 'Начинающий';
+        else if (course.level === 'intermediate') levelText = 'Средний';
+        else levelText = 'Продвинутый';
+        
+        // Создаем карточку курса
+        card.innerHTML = `
+          <div class="club-image">
+            <i class="fas ${icon}"></i>
+            <span class="club-badge">${levelText}</span>
           </div>
-          <div class="club-meta-item">
-            <i class="fas fa-users"></i> ${course.enrolled_count || 0}/${course.max_students}
+          <div class="club-content">
+            <h3 class="club-name">${course.name}</h3>
+            <p class="club-teacher">${course.teacher_name || 'Преподаватель не указан'}</p>
+            <div class="club-meta">
+              <div class="club-meta-item">
+                <i class="far fa-calendar-alt"></i> ${getScheduleText(course.schedule)}
+              </div>
+              <div class="club-meta-item">
+                <i class="fas fa-users"></i> ${course.enrolled_count || 0}/${course.max_students}
+              </div>
+            </div>
+            <p class="club-description">${course.description || 'Описание отсутствует'}</p>
+            <div class="club-actions">
+              <button class="details-btn" data-id="${course.id}">
+                <i class="fas fa-info-circle"></i> Подробнее
+              </button>
+              <button class="signup-btn" data-id="${course.id}">
+                Записаться
+              </button>
+            </div>
           </div>
-        </div>
-        <p class="club-description">${course.description || 'Описание отсутствует'}</p>
-        <div class="club-actions">
-          <button class="details-btn" data-id="${course.id}">
-            <i class="fas fa-info-circle"></i> Подробнее
-          </button>
-          <button class="signup-btn" data-id="${course.id}">
-            Записаться
-          </button>
-        </div>
-      </div>
-    `;
-    
-    clubsContainer.appendChild(card);
-  });
-  
-  // Настройка кнопок "Подробнее" и "Записаться"
+        `;
+        
+        clubsContainer.appendChild(card);
+      });
+      
+     // Настройка кнопок "Подробнее" и "Записаться"
   document.querySelectorAll('.details-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       const courseId = e.currentTarget.dataset.id;
