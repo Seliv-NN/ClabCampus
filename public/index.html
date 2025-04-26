@@ -756,6 +756,10 @@
             <label class="form-label">Фамилия</label>
             <input type="text" class="form-control" id="registerLastName">
           </div>
+            <div class="form-group form-check">
+    <input type="checkbox" class="form-check-input" id="registerIsTeacher">
+    <label class="form-check-label" for="registerIsTeacher">Вы преподаватель</label>
+  </div>
           <div class="form-actions">
             <button type="submit" class="btn">Зарегистрироваться</button>
           </div>
@@ -1376,14 +1380,22 @@ async function handleRegister(e) {
   const password = document.getElementById('registerPassword').value;
   const firstName = document.getElementById('registerFirstName').value;
   const lastName = document.getElementById('registerLastName').value;
+  const isTeacher = document.getElementById('registerIsTeacher').checked;
   
-  try {
+   try {
     const response = await fetch('/api/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ username, email, password, firstName, lastName })
+      body: JSON.stringify({ 
+        username, 
+        email, 
+        password, 
+        firstName, 
+        lastName,
+        isTeacher 
+      })
     });
     
     if (response.ok) {
@@ -1391,11 +1403,7 @@ async function handleRegister(e) {
       switchAuthTab('login');
       
       // Очищаем форму
-      document.getElementById('registerUsername').value = '';
-      document.getElementById('registerEmail').value = '';
-      document.getElementById('registerPassword').value = '';
-      document.getElementById('registerFirstName').value = '';
-      document.getElementById('registerLastName').value = '';
+      document.getElementById('registerForm').reset();
     } else {
       const error = await response.json();
       alert(error.error || 'Ошибка регистрации');
