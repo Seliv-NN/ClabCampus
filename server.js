@@ -130,20 +130,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Регистрация пользователя
 app.post('/api/register', (req, res) => {
-    const { username, email, password, firstName, lastName } = req.body;
+    const { username, email, password, firstName, lastName, isTeacher } = req.body;
 
     if (!username || !email || !password) {
         return res.status(400).json({ error: 'Все поля обязательны для заполнения' });
     }
+
+    const role = isTeacher ? 'teacher' : 'student';
 
     bcrypt.hash(password, 10, (err, hash) => {
         if (err) {
             return res.status(500).json({ error: 'Ошибка сервера' });
         }
 
-        db.run(`INSERT INTO users (username, email, password, first_name, last_name) 
-                VALUES (?, ?, ?, ?, ?)`, 
-                [username, email, hash, firstName, lastName], 
+        db.run(`INSERT INTO users (username, email, password, first_name, last_name, role) 
+                VALUES (?, ?, ?, ?, ?, ?)`, 
+                [username, email, hash, firstName, lastName, role], 
                 function(err) {
             if (err) {
                 if (err.message.includes('UNIQUE constraint failed')) {
