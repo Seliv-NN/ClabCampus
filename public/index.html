@@ -1458,12 +1458,6 @@ async function handleAddCourse(e) {
     alert('Только преподаватели могут добавлять курсы');
     closeModal('addCourseModal');
     return;
-    router.post('/api/courses', authenticate, (req, res) => {
-  if (req.user.role !== 'teacher') {
-    return res.status(403).json({ error: 'Только преподаватели могут создавать курсы' });
-  }
-  // Обработка создания курса
-});
   }
   
   const name = document.getElementById('courseName').value;
