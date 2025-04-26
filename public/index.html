@@ -988,18 +988,6 @@
           );
         }
         
-        items.forEach(item => {
-          const li = document.createElement('li');
-          const a = document.createElement('a');
-          a.href = '#';
-          a.innerHTML = `<i class="fas ${item.icon}"></i> ${item.text}`;
-          a.addEventListener('click', (e) => {
-            e.preventDefault();
-            item.action();
-            toggleMenu();
-          });
-          li.appendChild(a);
-          menuList.appendChild(li);
         });
       } else {
         // Меню для гостя
