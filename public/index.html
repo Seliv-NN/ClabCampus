@@ -278,6 +278,16 @@
       cursor: pointer;
       min-width: 180px;
     }
+    .filter-select:not([value=""]), 
+.search-input:not(:placeholder-shown) {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(110, 69, 226, 0.1);
+}
+
+.category-btn.active {
+  background: var(--primary);
+  color: white;
+}
 
     .filter-icon {
       position: absolute;
@@ -705,6 +715,9 @@
         <i class="fas fa-search search-icon"></i>
         <input type="text" class="search-input" placeholder="Поиск курсов..." id="searchInput">
       </div>
+      <button class="btn btn-outline" id="resetFilters">
+  <i class="fas fa-times"></i> Сбросить фильтры
+</button>
     </div>
 
     <!-- Сетка курсов -->
@@ -926,6 +939,15 @@
       document.getElementById('levelFilter').addEventListener('change', filterCourses);
       document.getElementById('searchInput').addEventListener('input', filterCourses);
       
+      document.getElementById('resetFilters').addEventListener('click', () => {
+  document.getElementById('categoryFilter').value = '';
+  document.getElementById('timeFilter').value = '';
+  document.getElementById('levelFilter').value = '';
+  document.getElementById('searchInput').value = '';
+  document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelector('.category-btn').classList.add('active'); // Активируем "Все курсы"
+  filterCourses();
+});
       // Настройка категорий
       document.querySelectorAll('.category-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1203,52 +1225,58 @@ function prepareSignup(courseId, courseName) {
 }
 
 function filterCourses() {
-  const categoryFilter = document.getElementById('categoryFilter').value;
+  const categoryFilter = document.getElementById('categoryFilter').value.toLowerCase();
   const timeFilter = document.getElementById('timeFilter').value;
-  const levelFilter = document.getElementById('levelFilter').value;
+  const levelFilter = document.getElementById('levelFilter').value.toLowerCase();
   const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-  const activeCategory = document.querySelector('.category-btn.active').textContent;
-  
+  const activeCategory = document.querySelector('.category-btn.active').textContent.toLowerCase();
+
   const filteredCourses = allCourses.filter(course => {
-    // Фильтр по категории (из выпадающего списка)
-    if (categoryFilter && course.category !== categoryFilter) return false;
-    
-    // Фильтр по категории (из кнопок)
-    if (activeCategory !== 'Все курсы' && course.category !== activeCategory) return false;
-    
-    // Фильтр по уровню
-    if (levelFilter) {
-      let levelText = '';
-      if (course.level === 'beginner') levelText = 'Начинающий';
-      else if (course.level === 'intermediate') levelText = 'Средний';
-      else levelText = 'Продвинутый';
-      
-      if (levelText !== levelFilter) return false;
+    // Фильтр по категории (из выпадающего списка ИЛИ кнопок)
+    if (categoryFilter && !course.category.toLowerCase().includes(categoryFilter) {
+      return false;
     }
-    
-    // Фильтр по времени
+    if (activeCategory !== 'все курсы' && !course.category.toLowerCase().includes(activeCategory)) {
+      return false;
+    }
+
+    // Фильтр по уровню (приводим к одному формату)
+    if (levelFilter) {
+      let courseLevel = '';
+      if (course.level === 'beginner') courseLevel = 'начинающий';
+      else if (course.level === 'intermediate') courseLevel = 'средний';
+      else if (course.level === 'advanced') courseLevel = 'продвинутый';
+      
+      if (!courseLevel.includes(levelFilter)) return false;
+    }
+
+    // Фильтр по времени (проверяем все расписания)
     if (timeFilter) {
-      let timeMatch = false;
-      course.schedule.forEach(s => {
+      const timeMatch = course.schedule.some(s => {
         const hour = parseInt(s.start_time.split(':')[0]);
-        if (timeFilter === 'Утро (9:00-12:00)' && hour >= 9 && hour < 12) timeMatch = true;
-        else if (timeFilter === 'День (12:00-17:00)' && hour >= 12 && hour < 17) timeMatch = true;
-        else if (timeFilter === 'Вечер (17:00-21:00)' && hour >= 17 && hour < 21) timeMatch = true;
+        if (timeFilter.includes('Утро') && hour >= 9 && hour < 12) return true;
+        if (timeFilter.includes('День') && hour >= 12 && hour < 17) return true;
+        if (timeFilter.includes('Вечер') && hour >= 17 && hour < 21) return true;
+        return false;
       });
       if (!timeMatch) return false;
     }
-    
-    // Фильтр по поиску
+
+    // Фильтр по поиску (ищем во всех полях)
     if (searchQuery) {
-      const nameMatch = course.name.toLowerCase().includes(searchQuery);
-      const descMatch = course.description.toLowerCase().includes(searchQuery);
-      const teacherMatch = course.teacher_name.toLowerCase().includes(searchQuery);
-      if (!nameMatch && !descMatch && !teacherMatch) return false;
+      const searchFields = [
+        course.name,
+        course.description,
+        course.teacher_name,
+        course.category
+      ].join(' ').toLowerCase();
+      
+      if (!searchFields.includes(searchQuery)) return false;
     }
-    
+
     return true;
   });
-  
+
   renderCourses(filteredCourses);
 }
 
