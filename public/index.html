@@ -736,6 +736,27 @@
         </form>
         
         <form id="registerForm" class="auth-form">
+  <!-- Существующие поля -->
+  <div class="form-group">
+    <label class="form-label">Имя пользователя</label>
+    <input type="text" class="form-control" id="registerUsername" required>
+  </div>
+  <!-- ... другие поля ... -->
+  
+  <!-- Добавьте это поле -->
+  <div class="form-group">
+    <label class="form-checkbox">
+      <input type="checkbox" id="registerIsTeacher"> 
+      Я преподаватель
+    </label>
+  </div>
+  
+  <div class="form-actions">
+    <button type="submit" class="btn">Зарегистрироваться</button>
+  </div>
+</form>
+        
+        <form id="registerForm" class="auth-form">
           <div class="form-group">
             <label class="form-label">Имя пользователя</label>
             <input type="text" class="form-control" id="registerUsername" required>
@@ -1407,7 +1428,43 @@ async function handleRegister(e) {
     alert('Ошибка при регистрации');
   }
 }
+    
+async function handleRegister(e) {
+  e.preventDefault();
+  const isTeacher = document.getElementById('registerIsTeacher').checked;
+  
+  const userData = {
+    username: document.getElementById('registerUsername').value,
+    email: document.getElementById('registerEmail').value,
+    password: document.getElementById('registerPassword').value,
+    firstName: document.getElementById('registerFirstName').value,
+    lastName: document.getElementById('registerLastName').value,
+    role: isTeacher ? 'teacher' : 'student' // Добавляем роль
+  };
 
+  try {
+    const response = await fetch('/api/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userData)
+    });
+    
+    if (response.ok) {
+      alert('Регистрация успешна! Теперь вы можете войти.');
+      switchAuthTab('login');
+      // Очищаем форму
+      document.getElementById('registerForm').reset();
+    } else {
+      const error = await response.json();
+      alert(error.error || 'Ошибка регистрации');
+    }
+  } catch (error) {
+    console.error('Ошибка при регистрации:', error);
+    alert('Ошибка при регистрации');
+  }
+}
 async function logout() {
   try {
     const response = await fetch('/api/logout', {
