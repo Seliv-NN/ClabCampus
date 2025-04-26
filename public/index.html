@@ -1383,7 +1383,6 @@ async function handleRegister(e) {
   const password = document.getElementById('registerPassword').value;
   const firstName = document.getElementById('registerFirstName').value;
   const lastName = document.getElementById('registerLastName').value;
-   role: isTeacher ? 'teacher' : 'student'
   
   try {
     const response = await fetch('/api/register', {
