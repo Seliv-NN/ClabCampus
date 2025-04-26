@@ -1384,12 +1384,7 @@ async function handleRegister(e) {
   const firstName = document.getElementById('registerFirstName').value;
   const lastName = document.getElementById('registerLastName').value;
    role: isTeacher ? 'teacher' : 'student'
-   <div class="form-group">
-    <label class="form-checkbox">
-      <input type="checkbox" id="registerIsTeacher"> 
-      Я преподаватель
-    </label>
-  </div>
+  
   try {
     const response = await fetch('/api/register', {
       method: 'POST',
