@@ -1389,6 +1389,7 @@ async function handleRegister(e) {
   const password = document.getElementById('registerPassword').value;
   const firstName = document.getElementById('registerFirstName').value;
   const lastName = document.getElementById('registerLastName').value;
+   role: isTeacher ? 'teacher' : 'student'
   
   try {
     const response = await fetch('/api/register', {
@@ -1419,60 +1420,6 @@ async function handleRegister(e) {
   }
 }
     
-async function handleRegister(e) {
-  e.preventDefault();
-  const isTeacher = document.getElementById('registerIsTeacher').checked;
-  
-  const userData = {
-    username: document.getElementById('registerUsername').value,
-    email: document.getElementById('registerEmail').value,
-    password: document.getElementById('registerPassword').value,
-    firstName: document.getElementById('registerFirstName').value,
-    lastName: document.getElementById('registerLastName').value,
-    role: isTeacher ? 'teacher' : 'student' // Добавляем роль
-  };
-
-  try {
-    const response = await fetch('/api/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(userData)
-    });
-    
-    if (response.ok) {
-      alert('Регистрация успешна! Теперь вы можете войти.');
-      switchAuthTab('login');
-      // Очищаем форму
-      document.getElementById('registerForm').reset();
-    } else {
-      const error = await response.json();
-      alert(error.error || 'Ошибка регистрации');
-    }
-  } catch (error) {
-    console.error('Ошибка при регистрации:', error);
-    alert('Ошибка при регистрации');
-  }
-}
-async function logout() {
-  try {
-    const response = await fetch('/api/logout', {
-      method: 'POST'
-    });
-    
-    if (response.ok) {
-      currentUser = null;
-      updateMenu();
-      scheduleBtn.style.display = 'none';
-      loadCourses();
-      toggleMenu();
-    }
-  } catch (error) {
-    console.error('Ошибка при выходе:', error);
-  }
-}
-
 async function handleEnrollment() {
   if (!currentUser) {
     openModal('authModal');
